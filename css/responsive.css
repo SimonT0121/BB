@@ -1,0 +1,845 @@
+/**
+ * 嬰幼兒照顧追蹤應用 - 響應式設計
+ * 提供不同設備尺寸的樣式調整
+ */
+
+/* 大型設備 (桌面, 1200px 以上) */
+@media (min-width: 1200px) {
+    /* 更寬的主要內容區域 */
+    .main-content {
+        padding: var(--spacing-lg);
+    }
+    
+    /* 更大的卡片 */
+    .card {
+        border-radius: var(--border-radius-xl);
+    }
+    
+    /* 更寬的統計網格 */
+    .stats-grid, .stats-grid-3 {
+        gap: var(--spacing-lg);
+    }
+    
+    /* 三列布局 */
+    .three-columns {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: var(--spacing-lg);
+    }
+}
+
+/* 中型設備 (筆記本電腦, 992px-1199px) */
+@media (min-width: 992px) and (max-width: 1199px) {
+    /* 側邊欄寬度 */
+    :root {
+        --sidebar-width: 14rem;
+    }
+    
+    /* 更大的網格間距 */
+    .stats-grid, .stats-grid-3 {
+        gap: var(--spacing-md);
+    }
+}
+
+/* 小型設備 (平板, 768px-991px) */
+@media (min-width: 768px) and (max-width: 991px) {
+    /* 側邊欄寬度 */
+    :root {
+        --sidebar-width: 12rem;
+    }
+    
+    /* 主要內容區域 */
+    .main-content {
+        margin-left: 0;
+    }
+    
+    /* 側邊欄默認隱藏 */
+    .app-sidebar {
+        transform: translateX(-100%);
+    }
+    
+    /* 顯示側邊欄 */
+    .sidebar-open .app-sidebar {
+        transform: translateX(0);
+    }
+    
+    /* 側邊欄顯示時的遮罩 */
+    .sidebar-open .sidebar-overlay {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    /* 調整快速操作按鈕 */
+    .quick-actions {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    /* 更緊湊的Dashboard佈局 */
+    .dashboard-container {
+        gap: var(--spacing-md);
+    }
+    
+    /* 列改為單列 */
+    .two-columns {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+    
+    /* 三列布局變為二列 */
+    .three-columns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-md);
+    }
+    
+    /* 調整餵食表單 */
+    .duration-row, .amount-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .form-group-half {
+        width: 100%;
+    }
+    
+    /* 顯示移動端底部導航 */
+    .mobile-nav {
+        display: flex;
+    }
+    
+    /* 調整快速添加按鈕位置 */
+    .fab {
+        bottom: calc(var(--footer-height) + var(--spacing-md));
+    }
+}
+
+/* 超小型設備 (手機, 576px-767px) */
+@media (min-width: 576px) and (max-width: 767px) {
+    /* 主要內容區域 */
+    .main-content {
+        margin-left: 0;
+        padding: var(--spacing-sm);
+    }
+    
+    /* 視圖容器 */
+    .view-container {
+        padding: var(--spacing-md);
+        border-radius: var(--border-radius-md);
+    }
+    
+    /* 側邊欄默認隱藏 */
+    .app-sidebar {
+        transform: translateX(-100%);
+        width: 80%;
+        max-width: 16rem;
+    }
+    
+    /* 顯示側邊欄 */
+    .sidebar-open .app-sidebar {
+        transform: translateX(0);
+    }
+    
+    /* 側邊欄顯示時的遮罩 */
+    .sidebar-open .sidebar-overlay {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    /* 顯示移動端底部導航 */
+    .mobile-nav {
+        display: flex;
+    }
+    
+    /* 調整快速添加按鈕位置 */
+    .fab {
+        bottom: calc(var(--footer-height) + var(--spacing-md));
+        right: var(--spacing-md);
+    }
+    
+    /* 調整卡片 */
+    .card {
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .card-header {
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+    
+    .card-content {
+        padding: var(--spacing-md);
+    }
+    
+    /* 調整數據摘要 */
+    .stats-grid, .stats-grid-3 {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+    
+    /* 調整快速操作 */
+    .quick-actions {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-sm);
+    }
+    
+    /* 調整佈局 */
+    .two-columns, .three-columns {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+    
+    /* 生長數據卡片 */
+    .growth-data {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    /* 兒童信息卡片 */
+    .child-basic-info {
+        flex-direction: row;
+        align-items: center;
+    }
+    
+    /* 調整表單 */
+    .form-row {
+        flex-direction: column;
+    }
+    
+    .form-group-half {
+        width: 100%;
+    }
+    
+    /* 模態對話框 */
+    .modal {
+        width: 95%;
+        max-height: 80vh;
+    }
+    
+    /* 通知 */
+    .notification-container {
+        width: 100%;
+        right: 0;
+    }
+    
+    .notification {
+        width: calc(100% - var(--spacing-sm) * 2);
+        max-width: none;
+        margin: 0 var(--spacing-sm);
+    }
+}
+
+/* 極小型設備 (小手機, 575px 以下) */
+@media (max-width: 575px) {
+    /* 根變量調整 */
+    :root {
+        --spacing-md: 0.75rem;     /* 12px */
+        --spacing-lg: 1.25rem;     /* 20px */
+        --header-height: 3rem;     /* 48px */
+    }
+    
+    /* 主要內容區域 */
+    .main-content {
+        margin-left: 0;
+        padding: var(--spacing-xs);
+    }
+    
+    /* 視圖容器 */
+    .view-container {
+        padding: var(--spacing-sm);
+        border-radius: var(--border-radius-sm);
+        min-height: calc(100vh - var(--header-height) - var(--footer-height) - var(--spacing-xs) * 2);
+    }
+    
+    /* 標題 */
+    .app-title {
+        font-size: var(--font-size-md);
+    }
+    
+    /* 頂部導航欄 */
+    .app-header {
+        padding: 0 var(--spacing-sm);
+    }
+    
+    /* 側邊欄默認隱藏 */
+    .app-sidebar {
+        transform: translateX(-100%);
+        width: 85%;
+        max-width: 16rem;
+    }
+    
+    /* 顯示側邊欄 */
+    .sidebar-open .app-sidebar {
+        transform: translateX(0);
+    }
+    
+    /* 側邊欄顯示時的遮罩 */
+    .sidebar-open .sidebar-overlay {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    /* 顯示移動端底部導航 */
+    .mobile-nav {
+        display: flex;
+    }
+    
+    /* 調整快速添加按鈕位置 */
+    .fab {
+        bottom: calc(var(--footer-height) + var(--spacing-sm));
+        right: var(--spacing-sm);
+        width: 3rem;
+        height: 3rem;
+    }
+    
+    /* 調整卡片 */
+    .card {
+        margin-bottom: var(--spacing-sm);
+        border-radius: var(--border-radius-md);
+    }
+    
+    .card-header {
+        padding: var(--spacing-sm);
+    }
+    
+    .card-icon {
+        width: 1.75rem;
+        height: 1.75rem;
+    }
+    
+    .card-icon svg {
+        width: 1rem;
+        height: 1rem;
+    }
+    
+    .card-title {
+        font-size: var(--font-size-md);
+    }
+    
+    .card-content {
+        padding: var(--spacing-sm);
+    }
+    
+    /* 調整數據摘要 */
+    .data-summary {
+        padding: var(--spacing-sm);
+    }
+    
+    .summary-icon {
+        width: 2rem;
+        height: 2rem;
+    }
+    
+    .summary-icon svg {
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+    
+    .summary-value {
+        font-size: var(--font-size-lg);
+    }
+    
+    .stats-grid, .stats-grid-3 {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+    
+    /* 調整快速操作 */
+    .quick-actions {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-sm);
+    }
+    
+    .action-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+    
+    .action-icon svg {
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+    
+    .action-text {
+        font-size: var(--font-size-sm);
+    }
+    
+    /* 調整佈局 */
+    .two-columns, .three-columns {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+    
+    /* 生長數據卡片 */
+    .growth-data {
+        grid-template-columns: 1fr;
+    }
+    
+    /* 兒童信息卡片 */
+    .child-basic-info {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .edit-child-button {
+        margin-left: 0;
+        margin-top: var(--spacing-sm);
+    }
+    
+    /* 頁面標題 */
+    .page-title {
+        font-size: var(--font-size-xl);
+        text-align: center;
+    }
+    
+    .page-subtitle {
+        font-size: var(--font-size-sm);
+        text-align: center;
+    }
+    
+    /* 調整設置 */
+    .settings-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+    
+    .toggle-switch {
+        align-self: flex-end;
+    }
+    
+    .settings-select {
+        width: 100%;
+    }
+    
+    .backup-actions {
+        flex-direction: column;
+    }
+    
+    /* 調整表單 */
+    .form-row {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+    
+    .form-group-half {
+        width: 100%;
+    }
+    
+    .form-label {
+        font-size: var(--font-size-sm);
+    }
+    
+    .quiet-hours-time {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+    
+    /* 標籤頁 */
+    .tab-button {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-size-sm);
+    }
+    
+    .tab-pane {
+        padding: var(--spacing-sm);
+    }
+    
+    /* 模態對話框 */
+    .modal {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 0;
+        height: 100vh;
+        max-height: 100vh;
+    }
+    
+    .modal-header {
+        padding: var(--spacing-md);
+    }
+    
+    .modal-title {
+        font-size: var(--font-size-lg);
+    }
+    
+    .modal-body {
+        padding: var(--spacing-md);
+    }
+    
+    .modal-footer {
+        padding: var(--spacing-md);
+    }
+    
+    /* 通知 */
+    .notification-container {
+        width: 100%;
+        top: var(--header-height);
+        right: 0;
+    }
+    
+    .notification {
+        width: 100%;
+        min-width: auto;
+        max-width: none;
+        border-radius: 0;
+    }
+    
+    /* 記錄列表 */
+    .record-item {
+        padding: var(--spacing-sm) 0;
+    }
+    
+    .record-time, .record-type {
+        font-size: var(--font-size-sm);
+    }
+    
+    /* 入門引導 */
+    .onboarding {
+        padding: var(--spacing-md);
+    }
+    
+    .welcome-icon {
+        width: 5rem;
+        height: 5rem;
+    }
+    
+    .welcome-icon svg {
+        width: 3.5rem;
+        height: 3.5rem;
+    }
+    
+    .welcome-title {
+        font-size: var(--font-size-xl);
+    }
+    
+    .welcome-text {
+        font-size: var(--font-size-sm);
+    }
+    
+    /* 兒童選擇器 */
+    .child-selector-view {
+        padding: var(--spacing-md) var(--spacing-sm);
+    }
+    
+    .selector-title {
+        font-size: var(--font-size-xl);
+    }
+    
+    .selector-text {
+        font-size: var(--font-size-sm);
+    }
+    
+    .child-list-item {
+        padding: var(--spacing-sm);
+    }
+    
+    .child-list-photo {
+        width: 3rem;
+        height: 3rem;
+    }
+    
+    .child-list-name {
+        font-size: var(--font-size-md);
+    }
+    
+    .child-list-age {
+        font-size: var(--font-size-sm);
+    }
+    
+    /* 快速添加菜單 */
+    .quick-add-menu {
+        bottom: calc(var(--footer-height) + 3rem);
+        right: var(--spacing-sm);
+    }
+    
+    .quick-add-label {
+        font-size: var(--font-size-sm);
+        padding: var(--spacing-xs) var(--spacing-sm);
+        margin-right: var(--spacing-sm);
+    }
+    
+    .quick-add-button {
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+    
+    .quick-add-button svg {
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+}
+
+/* 打印樣式 */
+@media print {
+    /* 隱藏不需要打印的元素 */
+    .app-header, 
+    .app-sidebar, 
+    .mobile-nav, 
+    .fab,
+    .sidebar-overlay,
+    .modal-container,
+    .notification-container,
+    button:not(.print-button) {
+        display: none !important;
+    }
+    
+    /* 重置邊距 */
+    .main-content {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .view-container {
+        padding: 0 !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+    }
+    
+    /* 卡片樣式調整 */
+    .card {
+        break-inside: avoid;
+        box-shadow: none !important;
+        border: 1px solid #ddd;
+        margin-bottom: 1rem !important;
+    }
+    
+    /* 確保黑色文本 */
+    body, p, h1, h2, h3, h4, h5, h6, span, div {
+        color: black !important;
+        background: white !important;
+    }
+    
+    /* 隱藏圖標背景色 */
+    .card-icon, .summary-icon, .action-icon {
+        background-color: transparent !important;
+    }
+    
+    .card-icon svg, .summary-icon svg, .action-icon svg {
+        fill: black !important;
+    }
+    
+    /* 表格調整 */
+    .data-table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    
+    .data-table th, .data-table td {
+        border: 1px solid #ddd;
+    }
+    
+    /* 頁眉頁腳 */
+    @page {
+        margin: 0.5cm;
+    }
+    
+    /* 添加頁眉 */
+    body::before {
+        content: "寶寶成長記錄 - 列印報告";
+        display: block;
+        text-align: center;
+        font-size: 18pt;
+        font-weight: bold;
+        margin-bottom: 1cm;
+    }
+    
+    /* 添加頁腳 */
+    body::after {
+        content: "頁 " counter(page) " / " counter(pages);
+        display: block;
+        text-align: center;
+        margin-top: 1cm;
+    }
+}
+
+/* 深色模式特定樣式覆蓋 */
+@media (prefers-color-scheme: dark) {
+    body:not(.light) {
+        --primary-color: #5c7bf5;
+        --primary-dark: #4a69e2;
+        --primary-light: #7991f7;
+        
+        --text-primary: #e0e0e0;
+        --text-secondary: #b0b0b0;
+        --text-muted: #909090;
+        
+        --bg-primary: #121212;
+        --bg-secondary: #1e1e1e;
+        --bg-tertiary: #2a2a2a;
+        
+        --border-color: #3a3a3a;
+        --divider-color: #2c2c2c;
+        
+        /* 交互狀態顏色 */
+        --hover-overlay: rgba(255, 255, 255, 0.07);
+        --active-overlay: rgba(255, 255, 255, 0.12);
+        
+        /* 陰影 */
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+        --shadow-md: 0 2px 5px rgba(0, 0, 0, 0.4);
+        --shadow-lg: 0 3px 10px rgba(0, 0, 0, 0.5);
+    }
+}
+
+/* 高對比度模式 */
+@media (prefers-contrast: high) {
+    :root {
+        --primary-color: #0000ff;
+        --primary-dark: #0000cc;
+        --primary-light: #3333ff;
+        
+        --text-primary: #000000;
+        --text-secondary: #333333;
+        --text-muted: #666666;
+        
+        --bg-primary: #ffffff;
+        --bg-secondary: #f0f0f0;
+        --bg-tertiary: #e0e0e0;
+        
+        --border-color: #000000;
+        --divider-color: #666666;
+        
+        --shadow-sm: 0 0 0 1px #000000;
+        --shadow-md: 0 0 0 2px #000000;
+        --shadow-lg: 0 0 0 3px #000000;
+    }
+    
+    /* 增加邊框對比度 */
+    .card, 
+    .data-summary, 
+    .form-control, 
+    .modal, 
+    .notification {
+        border: 1px solid #000000 !important;
+    }
+    
+    /* 增加文本對比度 */
+    .card-title, 
+    .summary-label, 
+    .summary-value, 
+    .form-label, 
+    .page-title, 
+    .child-name {
+        color: #000000 !important;
+    }
+    
+    /* 按鈕樣式強化 */
+    .primary-button, 
+    .secondary-button {
+        border: 2px solid #000000 !important;
+    }
+    
+    /* 深色背景元素加強對比 */
+    .card-icon, 
+    .summary-icon, 
+    .action-icon, 
+    .fab {
+        border: 2px solid #000000 !important;
+    }
+}
+
+/* 減少動畫 */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.001s !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001s !important;
+        scroll-behavior: auto !important;
+    }
+    
+    .card-content {
+        transition: none !important;
+    }
+    
+    .modal, 
+    .notification {
+        transition: none !important;
+    }
+    
+    .sidebar-open .app-sidebar {
+        transition: none !important;
+    }
+}
+
+/* 觸摸設備特定調整 */
+@media (hover: none) {
+    /* 增大點擊目標大小 */
+    .nav-link, 
+    .tab-button, 
+    .form-control, 
+    button {
+        min-height: 44px;
+    }
+    
+    /* 移除懸停效果 */
+    .card:hover, 
+    .data-summary:hover, 
+    .record-item:hover, 
+    .quick-action-button:hover {
+        transform: none !important;
+        box-shadow: var(--shadow-sm) !important;
+    }
+    
+    /* 調整滾動條 */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 4px;
+    }
+    
+    /* 增大底部導航項目 */
+    .mobile-nav-item {
+        padding: var(--spacing-md) 0;
+    }
+}
+
+/* 兼容性修復 */
+/* IE11 Flexbox 修復 */
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+    .form-row, 
+    .stats-grid, 
+    .quick-actions {
+        display: block;
+    }
+    
+    .form-group-half {
+        display: inline-block;
+        width: 48%;
+        margin-right: 2%;
+    }
+    
+    /* 模擬網格佈局 */
+    .stats-grid > * {
+        display: inline-block;
+        width: 48%;
+        margin-right: 2%;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .stats-grid-3 > * {
+        display: inline-block;
+        width: 31%;
+        margin-right: 2%;
+        margin-bottom: var(--spacing-md);
+    }
+}
+
+/* 舊版Safari修復 */
+@supports (-webkit-overflow-scrolling: touch) {
+    /* iOS Safari 弱化陰影，以提高性能 */
+    .card, 
+    .modal, 
+    .notification {
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* 修復 iOS 圓角溢出問題 */
+    .card,
+    .modal,
+    .data-summary {
+        overflow: hidden;
+        -webkit-mask-image: -webkit-radial-gradient(white, black);
+    }
+}
