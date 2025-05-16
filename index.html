@@ -3,270 +3,359 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="寶貝成長日記 - 紀錄寶寶的每個重要時刻，促進親子情感連結">
     <meta name="theme-color" content="#ffffff">
-    <meta name="description" content="嬰幼兒照顧追蹤應用程序">
-    <title>寶寶成長記錄 - 嬰幼兒照顧追蹤應用</title>
-    
-    <!-- 應用圖標 -->
-    <link rel="icon" href="assets/icons/favicon.ico">
-    <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
-    
-    <!-- 樣式表 -->
-    <link rel="stylesheet" href="css/normalize.css">
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/responsive.css">
-    
-    <!-- Manifest用於PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>寶貝成長日記 (BabyGrow)</title>
+    <link rel="stylesheet" href="css/style.css">
     <link rel="manifest" href="manifest.json">
+    <!-- 字體圖標 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- 預加載圖片 -->
+    <link rel="preload" href="assets/icons/baby-icon.png" as="image">
 </head>
-<body class="light">
-    <!-- 應用程序容器 -->
-    <div id="app" class="app-container">
-        <!-- 加載畫面 -->
-        <div id="loading-screen" class="loading-screen">
-            <div class="loading-animation">
-                <div class="baby-icon">👶</div>
-                <div class="loading-text">正在加載應用...</div>
-            </div>
+<body>
+    <!-- 應用程式加載畫面 -->
+    <div id="loading-screen">
+        <div class="loading-content">
+            <img src="assets/icons/baby-icon.png" alt="寶貝成長日記" class="loading-logo">
+            <h1>寶貝成長日記</h1>
+            <p>正在準備您的親子時光...</p>
+            <div class="loading-spinner"></div>
         </div>
-        
+    </div>
+
+    <!-- 主應用容器 -->
+    <div id="app" class="hidden">
         <!-- 頂部導航欄 -->
         <header class="app-header">
             <div class="header-left">
-                <button id="menu-toggle" class="icon-button menu-toggle" aria-label="菜單">
-                    <svg viewBox="0 0 24 24" width="24" height="24">
-                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path>
-                    </svg>
+                <button id="menu-toggle" class="icon-button" aria-label="菜單">
+                    <i class="fas fa-bars"></i>
                 </button>
-                <h1 class="app-title">寶寶成長記錄</h1>
+                <h1 id="page-title" class="header-title">寶貝成長日記</h1>
             </div>
-            
             <div class="header-right">
-                <div id="child-selector" class="child-selector">
-                    <!-- 兒童選擇器將通過JavaScript動態填充 -->
-                </div>
-                <button id="theme-toggle" class="icon-button theme-toggle" aria-label="切換主題">
-                    <svg viewBox="0 0 24 24" width="24" height="24" class="icon-light">
-                        <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41.39.39 1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41.39.39 1.03.39 1.41 0l1.06-1.06z"></path>
-                    </svg>
-                    <svg viewBox="0 0 24 24" width="24" height="24" class="icon-dark">
-                        <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"></path>
-                    </svg>
+                <button id="theme-toggle" class="icon-button" aria-label="切換主題">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button id="settings-button" class="icon-button" aria-label="設定">
+                    <i class="fas fa-cog"></i>
                 </button>
             </div>
         </header>
-        
-        <!-- 側邊欄/導航菜單 -->
-        <nav id="sidebar" class="app-sidebar">
-            <div class="sidebar-header">
-                <div class="app-logo">
-                    <img src="assets/icons/logo.svg" alt="寶寶成長記錄" width="40" height="40">
-                </div>
-                <div class="sidebar-title">寶寶成長記錄</div>
+
+        <!-- 側邊選單 -->
+        <nav id="side-menu" class="side-menu hidden">
+            <div class="menu-header">
+                <h2>寶貝成長日記</h2>
+                <button id="close-menu" class="icon-button" aria-label="關閉選單">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="#" data-view="dashboard" class="nav-link active">
-                        <svg viewBox="0 0 24 24" width="24" height="24">
-                            <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"></path>
-                        </svg>
-                        <span>儀表板</span>
-                    </a>
+            <div class="children-selector">
+                <h3>我的寶貝</h3>
+                <div id="children-list" class="children-list">
+                    <!-- 子女列表將由 JavaScript 動態填充 -->
+                </div>
+                <button id="add-child-button" class="primary-button">
+                    <i class="fas fa-plus"></i> 添加新寶貝
+                </button>
+            </div>
+            <ul class="menu-items">
+                <li data-page="dashboard" class="active">
+                    <i class="fas fa-home"></i>
+                    <span>主頁</span>
                 </li>
-                <li class="nav-item">
-                    <a href="#" data-view="feeding" class="nav-link">
-                        <svg viewBox="0 0 24 24" width="24" height="24">
-                            <path d="M11 8h2v2c0 .55.45 1 1 1s1-.45 1-1V8h2c.55 0 1-.45 1-1s-.45-1-1-1h-2V4c0-.55-.45-1-1-1s-1 .45-1 1v2h-2c-.55 0-1 .45-1 1s.45 1 1 1zm1 10c-3.31 0-6-2.69-6-6 0-3.32 2.69-6 6-6 3.31 0 6 2.68 6 6 0 3.31-2.69 6-6 6zm10-7h-2c0-5.52-4.48-10-10-10S0 5.48 0 11v7c0 1.66 1.34 3 3 3h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2c1.66 0 3-1.34 3-3v-3c0-2.21-1.79-4-4-4z"></path>
-                        </svg>
-                        <span>餵食</span>
-                    </a>
+                <li data-page="feeding">
+                    <i class="fas fa-utensils"></i>
+                    <span>餵食記錄</span>
                 </li>
-                <li class="nav-item">
-                    <a href="#" data-view="sleep" class="nav-link">
-                        <svg viewBox="0 0 24 24" width="24" height="24">
-                            <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"></path>
-                        </svg>
-                        <span>睡眠</span>
-                    </a>
+                <li data-page="sleep">
+                    <i class="fas fa-moon"></i>
+                    <span>睡眠記錄</span>
                 </li>
-                <li class="nav-item">
-                    <a href="#" data-view="diaper" class="nav-link">
-                        <svg viewBox="0 0 24 24" width="24" height="24">
-                            <path d="M18.5 2h-13C4.67 2 4 2.67 4 3.5v17c0 .83.67 1.5 1.5 1.5h13c.83 0 1.5-.67 1.5-1.5v-17c0-.83-.67-1.5-1.5-1.5zm-6.5 1c1.11 0 2 .89 2 2 0 1.11-.89 2-2 2-1.11 0-2-.89-2-2 0-1.11.89-2 2-2zm0 18c-2.48 0-4.5-2.02-4.5-4.5S9.52 12 12 12s4.5 2.02 4.5 4.5S14.48 21 12 21z"></path>
-                        </svg>
-                        <span>尿布</span>
-                    </a>
+                <li data-page="diaper">
+                    <i class="fas fa-baby"></i>
+                    <span>尿布記錄</span>
                 </li>
-                <li class="nav-item">
-                    <a href="#" data-view="mood" class="nav-link">
-                        <svg viewBox="0 0 24 24" width="24" height="24">
-                            <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"></path>
-                        </svg>
-                        <span>情緒</span>
-                    </a>
+                <li data-page="health">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>健康記錄</span>
                 </li>
-                <li class="nav-item">
-                    <a href="#" data-view="activity" class="nav-link">
-                        <svg viewBox="0 0 24 24" width="24" height="24">
-                            <path d="M13.5 5.5c0 .83.67 1.5 1.5 1.5.83 0 1.5-.67 1.5-1.5S15.83 4 15 4c-.83 0-1.5.67-1.5 1.5zM20 12v-1.5c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2V12h-1c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h1v1c0 .55.45 1 1 1s1-.45 1-1v-1h8v1c0 .55.45 1 1 1s1-.45 1-1v-1h1c.55 0 1-.45 1-1v-6c0-.55-.45-1-1-1h-1zm-4.8-2h3.6c.33 0 .6.27.6.6v.9H14.6v-.9c0-.33.27-.6.6-.6zM9.5 5.5c0 .83.67 1.5 1.5 1.5.83 0 1.5-.67 1.5-1.5S11.83 4 11 4c-.83 0-1.5.67-1.5 1.5zM11 10H7c-1.1 0-2 .9-2 2v5c0 .55.45 1 1 1h1v1c0 .55.45 1 1 1s1-.45 1-1v-1h2v1c0 .55.45 1 1 1s1-.45 1-1v-1h1c.55 0 1-.45 1-1v-5c0-1.1-.9-2-2-2z"></path>
-                        </svg>
-                        <span>活動</span>
-                    </a>
+                <li data-page="milestone">
+                    <i class="fas fa-star"></i>
+                    <span>發展里程碑</span>
                 </li>
-                <li class="nav-item">
-                    <a href="#" data-view="growth" class="nav-link">
-                        <svg viewBox="0 0 24 24" width="24" height="24">
-                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"></path>
-                        </svg>
-                        <span>生長</span>
-                    </a>
+                <li data-page="interaction">
+                    <i class="fas fa-heart"></i>
+                    <span>親子互動日記</span>
                 </li>
-                <li class="nav-item">
-                    <a href="#" data-view="health" class="nav-link">
-                        <svg viewBox="0 0 24 24" width="24" height="24">
-                            <path d="M19 3H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z"></path>
-                        </svg>
-                        <span>健康</span>
-                    </a>
+                <li data-page="mood">
+                    <i class="fas fa-smile"></i>
+                    <span>情緒與行為</span>
                 </li>
-                <li class="nav-item">
-                    <a href="#" data-view="milestone" class="nav-link">
-                        <svg viewBox="0 0 24 24" width="24" height="24">
-                            <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM7 10.82C5.84 10.4 5 9.3 5 8V7h2v3.82zM19 8c0 1.3-.84 2.4-2 2.82V7h2v1z"></path>
-                        </svg>
-                        <span>里程碑</span>
-                    </a>
+                <li data-page="analysis">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>數據分析</span>
                 </li>
-                <li class="nav-item">
-                    <a href="#" data-view="settings" class="nav-link">
-                        <svg viewBox="0 0 24 24" width="24" height="24">
-                            <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"></path>
-                        </svg>
-                        <span>設置</span>
-                    </a>
+                <li data-page="data-management">
+                    <i class="fas fa-database"></i>
+                    <span>數據管理</span>
                 </li>
             </ul>
-            
-            <div class="sidebar-footer">
-                <button id="add-child-button" class="primary-button add-child-button">
-                    <svg viewBox="0 0 24 24" width="20" height="20">
-                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path>
-                    </svg>
-                    <span>添加兒童</span>
-                </button>
-                <div class="app-version">版本 1.0.0</div>
+            <div class="menu-footer">
+                <span class="app-version">版本 1.0.0</span>
             </div>
         </nav>
-        
-        <!-- 遮罩層，用於移動設備上的側邊欄 -->
-        <div id="sidebar-overlay" class="sidebar-overlay"></div>
-        
+
         <!-- 主要內容區域 -->
         <main id="main-content" class="main-content">
-            <!-- 這裡的內容將由JavaScript動態填充 -->
-            <div id="view-container" class="view-container">
-                <!-- 視圖將在這裡渲染 -->
-            </div>
+            <!-- 歡迎頁 - 首次使用顯示 -->
+            <section id="welcome-page" class="page" data-page="welcome">
+                <div class="welcome-container">
+                    <img src="assets/icons/baby-icon.png" alt="寶貝成長日記" class="welcome-logo">
+                    <h2>歡迎使用寶貝成長日記</h2>
+                    <p>讓我們一起記錄寶寶的成長足跡，珍藏每個珍貴時刻。</p>
+                    <p class="welcome-description">
+                        這款應用程式不僅幫助您追蹤寶寶的日常活動和發展階段，
+                        更注重陪伴寶寶成長的情感體驗，成為您親子關係的數位摯友。
+                    </p>
+                    <button id="get-started-button" class="primary-button">
+                        開始我的親子旅程
+                    </button>
+                </div>
+            </section>
+
+            <!-- 儀表板頁面 -->
+            <section id="dashboard-page" class="page hidden" data-page="dashboard">
+                <div class="dashboard-header">
+                    <div id="active-child-profile" class="child-profile-header">
+                        <!-- 活躍子女檔案將由 JavaScript 動態填充 -->
+                    </div>
+                </div>
+                
+                <div class="quick-actions">
+                    <h3>快速記錄</h3>
+                    <div class="action-buttons">
+                        <button class="action-button" data-action="feeding">
+                            <i class="fas fa-utensils"></i>
+                            <span>餵食</span>
+                        </button>
+                        <button class="action-button" data-action="sleep">
+                            <i class="fas fa-moon"></i>
+                            <span>睡眠</span>
+                        </button>
+                        <button class="action-button" data-action="diaper">
+                            <i class="fas fa-baby"></i>
+                            <span>尿布</span>
+                        </button>
+                        <button class="action-button" data-action="mood">
+                            <i class="fas fa-smile"></i>
+                            <span>情緒</span>
+                        </button>
+                        <button class="action-button" data-action="milestone">
+                            <i class="fas fa-star"></i>
+                            <span>里程碑</span>
+                        </button>
+                        <button class="action-button" data-action="interaction">
+                            <i class="fas fa-heart"></i>
+                            <span>互動日記</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="today-summary">
+                    <h3>今日概覽</h3>
+                    <div id="today-summary-content" class="summary-cards">
+                        <!-- 今日數據摘要將由 JavaScript 動態填充 -->
+                    </div>
+                </div>
+                
+                <div class="recent-activities">
+                    <div class="section-header">
+                        <h3>近期活動</h3>
+                        <button id="view-all-activities" class="text-button">查看全部</button>
+                    </div>
+                    <div id="recent-activities-list" class="activities-list">
+                        <!-- 近期活動將由 JavaScript 動態填充 -->
+                    </div>
+                </div>
+                
+                <div class="dashboard-charts">
+                    <h3>一週趨勢</h3>
+                    <div class="chart-container">
+                        <canvas id="weekly-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="parent-reflection">
+                    <div class="section-header">
+                        <h3>親子時刻反思</h3>
+                        <button id="add-reflection" class="text-button">添加反思</button>
+                    </div>
+                    <div class="reflection-prompt">
+                        <p id="reflection-question">今天與寶寶相處時，什麼時刻讓您感到最幸福？</p>
+                    </div>
+                    <div id="parent-reflections" class="reflection-entries">
+                        <!-- 親子反思將由 JavaScript 動態填充 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 餵食記錄頁面 -->
+            <section id="feeding-page" class="page hidden" data-page="feeding">
+                <h2>餵食記錄</h2>
+                <div class="page-actions">
+                    <button id="add-feeding-record" class="primary-button">
+                        <i class="fas fa-plus"></i> 新增餵食記錄
+                    </button>
+                    <div class="filter-tools">
+                        <input type="date" id="feeding-date-filter" class="date-filter">
+                        <button id="feeding-filter-button" class="secondary-button">
+                            <i class="fas fa-filter"></i> 篩選
+                        </button>
+                    </div>
+                </div>
+                <div id="feeding-records-list" class="records-list">
+                    <!-- 餵食記錄將由 JavaScript 動態填充 -->
+                </div>
+            </section>
+
+            <!-- 其他頁面（睡眠、尿布、健康等）結構類似，暫不詳列 -->
+            <!-- 睡眠記錄頁面 -->
+            <section id="sleep-page" class="page hidden" data-page="sleep">
+                <!-- 睡眠記錄頁面內容 -->
+            </section>
+
+            <!-- 尿布記錄頁面 -->
+            <section id="diaper-page" class="page hidden" data-page="diaper">
+                <!-- 尿布記錄頁面內容 -->
+            </section>
+
+            <!-- 健康記錄頁面 -->
+            <section id="health-page" class="page hidden" data-page="health">
+                <!-- 健康記錄頁面內容 -->
+            </section>
+
+            <!-- 里程碑頁面 -->
+            <section id="milestone-page" class="page hidden" data-page="milestone">
+                <!-- 里程碑頁面內容 -->
+            </section>
+
+            <!-- 親子互動日記頁面 -->
+            <section id="interaction-page" class="page hidden" data-page="interaction">
+                <h2>親子互動日記</h2>
+                <div class="page-actions">
+                    <button id="add-interaction-record" class="primary-button">
+                        <i class="fas fa-plus"></i> 新增互動記錄
+                    </button>
+                    <div class="filter-tools">
+                        <input type="month" id="interaction-month-filter" class="date-filter">
+                    </div>
+                </div>
+                <div class="interaction-calendar" id="interaction-calendar">
+                    <!-- 互動日曆將由 JavaScript 動態填充 -->
+                </div>
+                <div id="interaction-records-list" class="interaction-list">
+                    <!-- 互動記錄將由 JavaScript 動態填充 -->
+                </div>
+            </section>
+
+            <!-- 情緒與行為頁面 -->
+            <section id="mood-page" class="page hidden" data-page="mood">
+                <!-- 情緒與行為頁面內容 -->
+            </section>
+
+            <!-- 數據分析頁面 -->
+            <section id="analysis-page" class="page hidden" data-page="analysis">
+                <h2>數據分析</h2>
+                <div class="analysis-filters">
+                    <div class="filter-group">
+                        <label for="analysis-type">分析類型</label>
+                        <select id="analysis-type" class="form-select">
+                            <option value="feeding">餵食分析</option>
+                            <option value="sleep">睡眠分析</option>
+                            <option value="health">健康趨勢</option>
+                            <option value="mood">情緒模式</option>
+                            <option value="development">發展進度</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="analysis-period">時間週期</label>
+                        <select id="analysis-period" class="form-select">
+                            <option value="week">一週</option>
+                            <option value="month">一個月</option>
+                            <option value="quarter">三個月</option>
+                            <option value="year">一年</option>
+                        </select>
+                    </div>
+                    <button id="generate-analysis" class="primary-button">
+                        <i class="fas fa-chart-line"></i> 生成分析
+                    </button>
+                </div>
+                <div class="analysis-content">
+                    <div class="chart-container">
+                        <canvas id="analysis-chart"></canvas>
+                    </div>
+                    <div id="analysis-insights" class="analysis-insights">
+                        <!-- 分析洞見將由 JavaScript 動態填充 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 數據管理頁面 -->
+            <section id="data-management-page" class="page hidden" data-page="data-management">
+                <h2>數據管理</h2>
+                <div class="data-management-options">
+                    <div class="data-card">
+                        <div class="data-card-header">
+                            <i class="fas fa-file-export"></i>
+                            <h3>匯出數據</h3>
+                        </div>
+                        <p>將您的所有記錄匯出為 JSON 格式檔案進行備份。</p>
+                        <button id="export-data-button" class="primary-button">匯出所有數據</button>
+                    </div>
+                    <div class="data-card">
+                        <div class="data-card-header">
+                            <i class="fas fa-file-import"></i>
+                            <h3>匯入數據</h3>
+                        </div>
+                        <p>從先前的備份檔案恢復您的記錄。</p>
+                        <div class="file-upload-container">
+                            <label for="import-data-file" class="primary-button">選擇備份檔案</label>
+                            <input type="file" id="import-data-file" accept=".json" class="hidden">
+                        </div>
+                        <button id="import-data-button" class="secondary-button" disabled>匯入數據</button>
+                    </div>
+                    <div class="data-card danger-zone">
+                        <div class="data-card-header">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>危險區域</h3>
+                        </div>
+                        <p>永久刪除應用程式數據。此操作無法撤銷！</p>
+                        <button id="clear-data-button" class="danger-button">清除所有數據</button>
+                    </div>
+                </div>
+            </section>
         </main>
-        
-        <!-- 底部導航欄 (僅在移動設備上顯示) -->
-        <footer class="mobile-nav">
-            <a href="#" data-view="dashboard" class="mobile-nav-item active">
-                <svg viewBox="0 0 24 24" width="24" height="24">
-                    <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"></path>
-                </svg>
-                <span>首頁</span>
-            </a>
-            <a href="#" data-view="feeding" class="mobile-nav-item">
-                <svg viewBox="0 0 24 24" width="24" height="24">
-                    <path d="M11 8h2v2c0 .55.45 1 1 1s1-.45 1-1V8h2c.55 0 1-.45 1-1s-.45-1-1-1h-2V4c0-.55-.45-1-1-1s-1 .45-1 1v2h-2c-.55 0-1 .45-1 1s.45 1 1 1z"></path>
-                </svg>
-                <span>餵食</span>
-            </a>
-            <a href="#" data-view="sleep" class="mobile-nav-item">
-                <svg viewBox="0 0 24 24" width="24" height="24">
-                    <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"></path>
-                </svg>
-                <span>睡眠</span>
-            </a>
-            <a href="#" data-view="diaper" class="mobile-nav-item">
-                <svg viewBox="0 0 24 24" width="24" height="24">
-                    <path d="M18.5 2h-13C4.67 2 4 2.67 4 3.5v17c0 .83.67 1.5 1.5 1.5h13c.83 0 1.5-.67 1.5-1.5v-17c0-.83-.67-1.5-1.5-1.5z"></path>
-                </svg>
-                <span>尿布</span>
-            </a>
-            <a href="#" data-view="more" class="mobile-nav-item">
-                <svg viewBox="0 0 24 24" width="24" height="24">
-                    <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path>
-                </svg>
-                <span>更多</span>
-            </a>
-        </footer>
-        
+
         <!-- 模態對話框容器 -->
-        <div id="modal-container" class="modal-container">
-            <!-- 模態對話框將通過JavaScript動態創建 -->
+        <div id="modal-container" class="modal-container hidden">
+            <!-- 模態對話框內容將由 JavaScript 動態生成 -->
         </div>
-        
-        <!-- 通知容器 -->
-        <div id="notification-container" class="notification-container">
-            <!-- 通知將通過JavaScript動態創建 -->
-        </div>
-        
-        <!-- 快速添加按鈕 (固定在右下角) -->
-        <button id="quick-add-button" class="fab quick-add-button">
-            <svg viewBox="0 0 24 24" width="24" height="24">
-                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path>
-            </svg>
-        </button>
     </div>
+
+    <!-- 提示訊息容器 -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- 腳本引用 -->
+    <script src="js/config.js" type="module"></script>
+    <script src="js/db.js" type="module"></script>
+    <script src="js/ui.js" type="module"></script>
+    <script src="js/app.js" type="module"></script>
     
-    <!-- Scripts -->
-    <!-- 先加載通用工具和核心模塊 -->
-    <script src="js/utils/utils.js"></script>
-    <script src="js/core.js"></script>
-    
-    <!-- 然後加載數據模型和存儲 -->
-    <script src="js/models/storage.js"></script>
-    <script src="js/models/user.js"></script>
-    <script src="js/models/child.js"></script>
-    <script src="js/models/feeding.js"></script>
-    <script src="js/models/sleep.js"></script>
-    <script src="js/models/diaper.js"></script>
-    <script src="js/models/mood.js"></script>
-    <script src="js/models/activity.js"></script>
-    <script src="js/models/growth.js"></script>
-    <script src="js/models/health.js"></script>
-    <script src="js/models/milestone.js"></script>
-    
-    <!-- 然後加載服務 -->
-    <script src="js/services/notification.js"></script>
-    <script src="js/services/data.js"></script>
-    <script src="js/services/chart.js"></script>
-    <script src="js/services/backup.js"></script>
-    
-    <!-- 然後加載UI組件 -->
-    <script src="js/views/components.js"></script>
-    <script src="js/views/modal.js"></script>
-    <script src="js/views/forms.js"></script>
-    <script src="js/views/charts.js"></script>
-    
-    <!-- 最後加載控制器和視圖 -->
-    <script src="js/controllers/router.js"></script>
-    <script src="js/controllers/dashboard.js"></script>
-    <script src="js/controllers/feeding.js"></script>
-    <script src="js/controllers/sleep.js"></script>
-    <script src="js/controllers/diaper.js"></script>
-    <script src="js/controllers/mood.js"></script>
-    <script src="js/controllers/activity.js"></script>
-    <script src="js/controllers/growth.js"></script>
-    <script src="js/controllers/health.js"></script>
-    <script src="js/controllers/milestone.js"></script>
-    <script src="js/controllers/settings.js"></script>
-    
-    <!-- 最後加載應用程序入口點 -->
-    <script src="js/app.js"></script>
+    <!-- 可選：用於圖表的 CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
 </body>
 </html>
