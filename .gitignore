@@ -1,46 +1,82 @@
-# 專案相關檔案
+# 依賴目錄
 node_modules/
-dist/
-.temp/
-.cache/
-build/
+jspm_packages/
 
-# 作業系統相關
-.DS_Store
-Thumbs.db
+# 編譯輸出
+dist/
+build/
+out/
+lib/
+
+# 日誌檔案
+logs
 *.log
-logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
 
-# 編輯器相關
-.idea/
-.vscode/
-*.swp
-*.swo
-.editorconfig
-.prettierignore
-.eslintignore
+# 診斷報告
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
-# 環境檔案
+# 運行時數據
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# 目錄用於測試工具使用的工具庫
+coverage/
+.nyc_output
+
+# 環境變數檔案
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# 其他
-coverage/
-*.tgz
-.pnp.*
-.yarn/*
-!.yarn/cache
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
+# 打包工具和編輯器的配置檔案
+.vscode/
+.idea/
+*.iml
+*.swp
+*.swo
+.DS_Store
 
-# 特定於此專案的
-*.backup.json
+# TypeScript相關
+*.tsbuildinfo
+
+# 緩存目錄
+.npm
+.eslintcache
+.cache
+.parcel-cache
+
+# 可選的 npm 緩存目錄
+.npm
+
+# 可選的 REPL 歷史記錄
+.node_repl_history
+
+# 可選的 npm 包
+.yarn-integrity
+
+# dotenv 環境變數檔案
+.env
+
+# 打包檔案
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# yarn v2
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# 本地檔案
+*.local

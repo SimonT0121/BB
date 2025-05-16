@@ -3,138 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="寶貝成長日記 - 紀錄寶寶的每個重要時刻，促進親子情感連結">
-    <meta name="theme-color" content="#ffffff">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>寶貝成長日記 (BabyGrow)</title>
+    <meta name="description" content="寶貝日誌 - 專注於親子互動與情感支持的嬰幼兒照顧追蹤應用">
+    <meta name="theme-color" content="#64B5F6">
+    <title>寶貝日誌 (BabyLog)</title>
     <link rel="stylesheet" href="css/style.css">
+    <!-- 預加載字體以避免文字閃爍 -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap"></noscript>
+    <!-- 使用Font Awesome圖標 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 應用程式圖標 -->
+    <link rel="icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <!-- PWA清單 -->
     <link rel="manifest" href="manifest.json">
-    <!-- 字體圖標 -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <!-- 預加載圖片 -->
-    <link rel="preload" href="assets/icons/baby-icon.png" as="image">
 </head>
 <body>
-    <!-- 應用程式加載畫面 -->
-    <div id="loading-screen">
-        <div class="loading-content">
-            <img src="assets/icons/baby-icon.png" alt="寶貝成長日記" class="loading-logo">
-            <h1>寶貝成長日記</h1>
-            <p>正在準備您的親子時光...</p>
-            <div class="loading-spinner"></div>
-        </div>
-    </div>
-
-    <!-- 主應用容器 -->
-    <div id="app" class="hidden">
-        <!-- 頂部導航欄 -->
+    <!-- 應用程式外殼結構 -->
+    <div class="app-container" id="app">
+        <!-- 頂部導航 -->
         <header class="app-header">
-            <div class="header-left">
-                <button id="menu-toggle" class="icon-button" aria-label="菜單">
+            <div class="header-content">
+                <button id="menuToggle" class="menu-toggle" aria-label="開啟選單">
                     <i class="fas fa-bars"></i>
                 </button>
-                <h1 id="page-title" class="header-title">寶貝成長日記</h1>
-            </div>
-            <div class="header-right">
-                <button id="theme-toggle" class="icon-button" aria-label="切換主題">
-                    <i class="fas fa-moon"></i>
-                </button>
-                <button id="settings-button" class="icon-button" aria-label="設定">
-                    <i class="fas fa-cog"></i>
-                </button>
+                <h1 class="app-title">寶貝日誌</h1>
+                <div class="header-actions">
+                    <button id="themeToggle" class="theme-toggle" aria-label="切換主題">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
             </div>
         </header>
 
         <!-- 側邊選單 -->
-        <nav id="side-menu" class="side-menu hidden">
-            <div class="menu-header">
-                <h2>寶貝成長日記</h2>
-                <button id="close-menu" class="icon-button" aria-label="關閉選單">
+        <nav class="app-nav" id="appNav">
+            <div class="nav-header">
+                <h2>選單</h2>
+                <button id="closeMenu" class="close-menu" aria-label="關閉選單">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="children-selector">
-                <h3>我的寶貝</h3>
-                <div id="children-list" class="children-list">
-                    <!-- 子女列表將由 JavaScript 動態填充 -->
-                </div>
-                <button id="add-child-button" class="primary-button">
-                    <i class="fas fa-plus"></i> 添加新寶貝
-                </button>
+            <div class="nav-content">
+                <ul class="nav-list">
+                    <li><a href="#home" class="nav-item active" data-view="home"><i class="fas fa-home"></i> 首頁</a></li>
+                    <li><a href="#children" class="nav-item" data-view="children"><i class="fas fa-child"></i> 孩子檔案</a></li>
+                    <li><a href="#daily" class="nav-item" data-view="daily"><i class="fas fa-calendar-day"></i> 日常記錄</a></li>
+                    <li><a href="#health" class="nav-item" data-view="health"><i class="fas fa-heartbeat"></i> 健康管理</a></li>
+                    <li><a href="#milestones" class="nav-item" data-view="milestones"><i class="fas fa-trophy"></i> 成長里程碑</a></li>
+                    <li><a href="#reports" class="nav-item" data-view="reports"><i class="fas fa-chart-bar"></i> 數據分析</a></li>
+                    <li><a href="#reflection" class="nav-item" data-view="reflection"><i class="fas fa-book"></i> 親子日記</a></li>
+                    <li><a href="#settings" class="nav-item" data-view="settings"><i class="fas fa-cog"></i> 設定</a></li>
+                </ul>
             </div>
-            <ul class="menu-items">
-                <li data-page="dashboard" class="active">
-                    <i class="fas fa-home"></i>
-                    <span>主頁</span>
-                </li>
-                <li data-page="feeding">
-                    <i class="fas fa-utensils"></i>
-                    <span>餵食記錄</span>
-                </li>
-                <li data-page="sleep">
-                    <i class="fas fa-moon"></i>
-                    <span>睡眠記錄</span>
-                </li>
-                <li data-page="diaper">
-                    <i class="fas fa-baby"></i>
-                    <span>尿布記錄</span>
-                </li>
-                <li data-page="health">
-                    <i class="fas fa-heartbeat"></i>
-                    <span>健康記錄</span>
-                </li>
-                <li data-page="milestone">
-                    <i class="fas fa-star"></i>
-                    <span>發展里程碑</span>
-                </li>
-                <li data-page="interaction">
-                    <i class="fas fa-heart"></i>
-                    <span>親子互動日記</span>
-                </li>
-                <li data-page="mood">
-                    <i class="fas fa-smile"></i>
-                    <span>情緒與行為</span>
-                </li>
-                <li data-page="analysis">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>數據分析</span>
-                </li>
-                <li data-page="data-management">
-                    <i class="fas fa-database"></i>
-                    <span>數據管理</span>
-                </li>
-            </ul>
-            <div class="menu-footer">
-                <span class="app-version">版本 1.0.0</span>
+            <div class="nav-footer">
+                <button id="dataBackup" class="nav-button"><i class="fas fa-download"></i> 備份數據</button>
+                <button id="dataRestore" class="nav-button"><i class="fas fa-upload"></i> 恢復數據</button>
             </div>
         </nav>
 
-        <!-- 主要內容區域 -->
-        <main id="main-content" class="main-content">
-            <!-- 歡迎頁 - 首次使用顯示 -->
-            <section id="welcome-page" class="page" data-page="welcome">
+        <!-- 主要內容區 -->
+        <main class="app-main" id="appMain">
+            <!-- 初始歡迎畫面 -->
+            <section id="welcomeView" class="app-view active-view">
                 <div class="welcome-container">
-                    <img src="assets/icons/baby-icon.png" alt="寶貝成長日記" class="welcome-logo">
-                    <h2>歡迎使用寶貝成長日記</h2>
-                    <p>讓我們一起記錄寶寶的成長足跡，珍藏每個珍貴時刻。</p>
-                    <p class="welcome-description">
-                        這款應用程式不僅幫助您追蹤寶寶的日常活動和發展階段，
-                        更注重陪伴寶寶成長的情感體驗，成為您親子關係的數位摯友。
-                    </p>
-                    <button id="get-started-button" class="primary-button">
-                        開始我的親子旅程
-                    </button>
+                    <div class="welcome-header">
+                        <img src="img/logo.svg" alt="寶貝日誌 Logo" class="welcome-logo">
+                        <h2>歡迎使用寶貝日誌</h2>
+                        <p>記錄照顧旅程，珍藏成長時刻</p>
+                    </div>
+                    <div class="welcome-features">
+                        <div class="feature-item">
+                            <i class="fas fa-baby feature-icon"></i>
+                            <h3>追蹤成長</h3>
+                            <p>記錄餵食、睡眠和里程碑</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-heart feature-icon"></i>
+                            <p>情感支持</p>
+                            <p>提供父母的情感支持與反思</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-shield-alt feature-icon"></i>
+                            <h3>隱私第一</h3>
+                            <p>數據只存在您的設備上</p>
+                        </div>
+                    </div>
+                    <div class="welcome-action">
+                        <button id="startButton" class="primary-button">開始使用</button>
+                    </div>
                 </div>
             </section>
 
-            <!-- 儀表板頁面 -->
-            <section id="dashboard-page" class="page hidden" data-page="dashboard">
-                <div class="dashboard-header">
-                    <div id="active-child-profile" class="child-profile-header">
-                        <!-- 活躍子女檔案將由 JavaScript 動態填充 -->
-                    </div>
+            <!-- 首頁視圖 -->
+            <section id="homeView" class="app-view">
+                <div class="home-header">
+                    <h2>今日概覽</h2>
+                    <p class="date-display" id="currentDate">載入中...</p>
                 </div>
                 
+                <!-- 孩子選擇器 -->
+                <div class="child-selector" id="childSelector">
+                    <!-- 將由JavaScript動態填充 -->
+                </div>
+                
+                <!-- 快速操作 -->
                 <div class="quick-actions">
                     <h3>快速記錄</h3>
                     <div class="action-buttons">
@@ -148,214 +121,176 @@
                         </button>
                         <button class="action-button" data-action="diaper">
                             <i class="fas fa-baby"></i>
-                            <span>尿布</span>
+                            <span>換尿布</span>
                         </button>
-                        <button class="action-button" data-action="mood">
-                            <i class="fas fa-smile"></i>
-                            <span>情緒</span>
+                        <button class="action-button" data-action="health">
+                            <i class="fas fa-heartbeat"></i>
+                            <span>健康</span>
                         </button>
                         <button class="action-button" data-action="milestone">
-                            <i class="fas fa-star"></i>
+                            <i class="fas fa-trophy"></i>
                             <span>里程碑</span>
                         </button>
-                        <button class="action-button" data-action="interaction">
-                            <i class="fas fa-heart"></i>
-                            <span>互動日記</span>
+                        <button class="action-button" data-action="note">
+                            <i class="fas fa-sticky-note"></i>
+                            <span>筆記</span>
                         </button>
                     </div>
                 </div>
                 
+                <!-- 今日摘要 -->
                 <div class="today-summary">
-                    <h3>今日概覽</h3>
-                    <div id="today-summary-content" class="summary-cards">
-                        <!-- 今日數據摘要將由 JavaScript 動態填充 -->
+                    <h3>今日摘要</h3>
+                    <div class="summary-container" id="todaySummary">
+                        <!-- 將由JavaScript動態填充 -->
+                        <div class="placeholder-content">
+                            <p>選擇一個孩子來查看今日摘要</p>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="recent-activities">
-                    <div class="section-header">
-                        <h3>近期活動</h3>
-                        <button id="view-all-activities" class="text-button">查看全部</button>
-                    </div>
-                    <div id="recent-activities-list" class="activities-list">
-                        <!-- 近期活動將由 JavaScript 動態填充 -->
-                    </div>
-                </div>
-                
-                <div class="dashboard-charts">
-                    <h3>一週趨勢</h3>
-                    <div class="chart-container">
-                        <canvas id="weekly-chart"></canvas>
-                    </div>
-                </div>
-                
+                <!-- 父母反思 -->
                 <div class="parent-reflection">
-                    <div class="section-header">
-                        <h3>親子時刻反思</h3>
-                        <button id="add-reflection" class="text-button">添加反思</button>
-                    </div>
+                    <h3>今日反思</h3>
                     <div class="reflection-prompt">
-                        <p id="reflection-question">今天與寶寶相處時，什麼時刻讓您感到最幸福？</p>
-                    </div>
-                    <div id="parent-reflections" class="reflection-entries">
-                        <!-- 親子反思將由 JavaScript 動態填充 -->
-                    </div>
-                </div>
-            </section>
-
-            <!-- 餵食記錄頁面 -->
-            <section id="feeding-page" class="page hidden" data-page="feeding">
-                <h2>餵食記錄</h2>
-                <div class="page-actions">
-                    <button id="add-feeding-record" class="primary-button">
-                        <i class="fas fa-plus"></i> 新增餵食記錄
-                    </button>
-                    <div class="filter-tools">
-                        <input type="date" id="feeding-date-filter" class="date-filter">
-                        <button id="feeding-filter-button" class="secondary-button">
-                            <i class="fas fa-filter"></i> 篩選
-                        </button>
+                        <p id="reflectionPrompt">您今天如何與寶寶一起度過美好時光？</p>
+                        <textarea id="reflectionInput" placeholder="分享您的想法和感受..."></textarea>
+                        <button id="saveReflection" class="secondary-button">保存反思</button>
                     </div>
                 </div>
-                <div id="feeding-records-list" class="records-list">
-                    <!-- 餵食記錄將由 JavaScript 動態填充 -->
-                </div>
             </section>
 
-            <!-- 其他頁面（睡眠、尿布、健康等）結構類似，暫不詳列 -->
-            <!-- 睡眠記錄頁面 -->
-            <section id="sleep-page" class="page hidden" data-page="sleep">
-                <!-- 睡眠記錄頁面內容 -->
-            </section>
-
-            <!-- 尿布記錄頁面 -->
-            <section id="diaper-page" class="page hidden" data-page="diaper">
-                <!-- 尿布記錄頁面內容 -->
-            </section>
-
-            <!-- 健康記錄頁面 -->
-            <section id="health-page" class="page hidden" data-page="health">
-                <!-- 健康記錄頁面內容 -->
-            </section>
-
-            <!-- 里程碑頁面 -->
-            <section id="milestone-page" class="page hidden" data-page="milestone">
-                <!-- 里程碑頁面內容 -->
-            </section>
-
-            <!-- 親子互動日記頁面 -->
-            <section id="interaction-page" class="page hidden" data-page="interaction">
-                <h2>親子互動日記</h2>
-                <div class="page-actions">
-                    <button id="add-interaction-record" class="primary-button">
-                        <i class="fas fa-plus"></i> 新增互動記錄
-                    </button>
-                    <div class="filter-tools">
-                        <input type="month" id="interaction-month-filter" class="date-filter">
-                    </div>
-                </div>
-                <div class="interaction-calendar" id="interaction-calendar">
-                    <!-- 互動日曆將由 JavaScript 動態填充 -->
-                </div>
-                <div id="interaction-records-list" class="interaction-list">
-                    <!-- 互動記錄將由 JavaScript 動態填充 -->
-                </div>
-            </section>
-
-            <!-- 情緒與行為頁面 -->
-            <section id="mood-page" class="page hidden" data-page="mood">
-                <!-- 情緒與行為頁面內容 -->
-            </section>
-
-            <!-- 數據分析頁面 -->
-            <section id="analysis-page" class="page hidden" data-page="analysis">
-                <h2>數據分析</h2>
-                <div class="analysis-filters">
-                    <div class="filter-group">
-                        <label for="analysis-type">分析類型</label>
-                        <select id="analysis-type" class="form-select">
-                            <option value="feeding">餵食分析</option>
-                            <option value="sleep">睡眠分析</option>
-                            <option value="health">健康趨勢</option>
-                            <option value="mood">情緒模式</option>
-                            <option value="development">發展進度</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label for="analysis-period">時間週期</label>
-                        <select id="analysis-period" class="form-select">
-                            <option value="week">一週</option>
-                            <option value="month">一個月</option>
-                            <option value="quarter">三個月</option>
-                            <option value="year">一年</option>
-                        </select>
-                    </div>
-                    <button id="generate-analysis" class="primary-button">
-                        <i class="fas fa-chart-line"></i> 生成分析
+            <!-- 孩子檔案視圖 -->
+            <section id="childrenView" class="app-view">
+                <div class="section-header">
+                    <h2>孩子檔案</h2>
+                    <button id="addChildButton" class="action-button">
+                        <i class="fas fa-plus"></i>
+                        <span>添加孩子</span>
                     </button>
                 </div>
-                <div class="analysis-content">
-                    <div class="chart-container">
-                        <canvas id="analysis-chart"></canvas>
+                
+                <div class="children-list" id="childrenList">
+                    <!-- 將由JavaScript動態填充 -->
+                    <div class="placeholder-content">
+                        <p>尚未添加任何孩子</p>
                     </div>
-                    <div id="analysis-insights" class="analysis-insights">
-                        <!-- 分析洞見將由 JavaScript 動態填充 -->
+                </div>
+            </section>
+            
+            <!-- 日常記錄視圖 -->
+            <section id="dailyView" class="app-view">
+                <div class="section-header">
+                    <h2>日常記錄</h2>
+                    <div class="view-controls">
+                        <button class="view-control active" data-view="day">日</button>
+                        <button class="view-control" data-view="week">週</button>
+                        <button class="view-control" data-view="month">月</button>
+                    </div>
+                </div>
+                
+                <!-- 日期選擇器 -->
+                <div class="date-selector">
+                    <button id="prevDate" class="date-nav"><i class="fas fa-chevron-left"></i></button>
+                    <div id="selectedDate" class="selected-date">2024年5月17日</div>
+                    <button id="nextDate" class="date-nav"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                
+                <!-- 分類標籤 -->
+                <div class="category-tabs">
+                    <button class="category-tab active" data-category="all">全部</button>
+                    <button class="category-tab" data-category="feeding">餵食</button>
+                    <button class="category-tab" data-category="sleep">睡眠</button>
+                    <button class="category-tab" data-category="diaper">尿布</button>
+                    <button class="category-tab" data-category="other">其他</button>
+                </div>
+                
+                <!-- 活動時間軸 -->
+                <div class="activity-timeline" id="activityTimeline">
+                    <!-- 將由JavaScript動態填充 -->
+                    <div class="placeholder-content">
+                        <p>選擇一個日期來查看記錄</p>
                     </div>
                 </div>
             </section>
 
-            <!-- 數據管理頁面 -->
-            <section id="data-management-page" class="page hidden" data-page="data-management">
-                <h2>數據管理</h2>
-                <div class="data-management-options">
-                    <div class="data-card">
-                        <div class="data-card-header">
-                            <i class="fas fa-file-export"></i>
-                            <h3>匯出數據</h3>
-                        </div>
-                        <p>將您的所有記錄匯出為 JSON 格式檔案進行備份。</p>
-                        <button id="export-data-button" class="primary-button">匯出所有數據</button>
-                    </div>
-                    <div class="data-card">
-                        <div class="data-card-header">
-                            <i class="fas fa-file-import"></i>
-                            <h3>匯入數據</h3>
-                        </div>
-                        <p>從先前的備份檔案恢復您的記錄。</p>
-                        <div class="file-upload-container">
-                            <label for="import-data-file" class="primary-button">選擇備份檔案</label>
-                            <input type="file" id="import-data-file" accept=".json" class="hidden">
-                        </div>
-                        <button id="import-data-button" class="secondary-button" disabled>匯入數據</button>
-                    </div>
-                    <div class="data-card danger-zone">
-                        <div class="data-card-header">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <h3>危險區域</h3>
-                        </div>
-                        <p>永久刪除應用程式數據。此操作無法撤銷！</p>
-                        <button id="clear-data-button" class="danger-button">清除所有數據</button>
-                    </div>
-                </div>
-            </section>
+            <!-- 更多視圖將在這裡添加... -->
+            <!-- 各種表單和模態窗口也將在這裡添加... -->
         </main>
 
-        <!-- 模態對話框容器 -->
-        <div id="modal-container" class="modal-container hidden">
-            <!-- 模態對話框內容將由 JavaScript 動態生成 -->
+        <!-- 底部導航 -->
+        <footer class="app-footer">
+            <div class="footer-nav">
+                <a href="#home" class="footer-nav-item active" data-view="home">
+                    <i class="fas fa-home"></i>
+                    <span>首頁</span>
+                </a>
+                <a href="#daily" class="footer-nav-item" data-view="daily">
+                    <i class="fas fa-calendar-day"></i>
+                    <span>日常</span>
+                </a>
+                <a href="#quick-add" class="footer-nav-item footer-nav-center" id="quickAddButton">
+                    <div class="quick-add-button">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                </a>
+                <a href="#health" class="footer-nav-item" data-view="health">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>健康</span>
+                </a>
+                <a href="#reports" class="footer-nav-item" data-view="reports">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>報告</span>
+                </a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 模態窗口容器 -->
+    <div class="modal-container" id="modalContainer">
+        <!-- 模態窗口將由JavaScript動態創建 -->
+    </div>
+
+    <!-- 快速添加選單 -->
+    <div class="quick-add-menu" id="quickAddMenu">
+        <div class="quick-add-backdrop"></div>
+        <div class="quick-add-options">
+            <button class="quick-option" data-action="feeding">
+                <i class="fas fa-utensils"></i>
+                <span>餵食</span>
+            </button>
+            <button class="quick-option" data-action="sleep">
+                <i class="fas fa-moon"></i>
+                <span>睡眠</span>
+            </button>
+            <button class="quick-option" data-action="diaper">
+                <i class="fas fa-baby"></i>
+                <span>換尿布</span>
+            </button>
+            <button class="quick-option" data-action="health">
+                <i class="fas fa-heartbeat"></i>
+                <span>健康</span>
+            </button>
+            <button class="quick-option" data-action="milestone">
+                <i class="fas fa-trophy"></i>
+                <span>里程碑</span>
+            </button>
+            <button class="quick-option" data-action="note">
+                <i class="fas fa-sticky-note"></i>
+                <span>筆記</span>
+            </button>
         </div>
     </div>
 
-    <!-- 提示訊息容器 -->
-    <div id="toast-container" class="toast-container"></div>
+    <!-- 提示消息容器 -->
+    <div class="toast-container" id="toastContainer">
+        <!-- 提示消息將由JavaScript動態創建 -->
+    </div>
 
-    <!-- 腳本引用 -->
+    <!-- JavaScript 模組 -->
     <script src="js/config.js" type="module"></script>
     <script src="js/db.js" type="module"></script>
     <script src="js/ui.js" type="module"></script>
     <script src="js/app.js" type="module"></script>
-    
-    <!-- 可選：用於圖表的 CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
 </body>
 </html>
