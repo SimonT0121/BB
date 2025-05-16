@@ -1,1502 +1,945 @@
-/**
- * ui.js - UI 操作與渲染模組
- * 
- * 此模組負責所有 DOM 操作和 UI 更新，包括頁面切換、模態對話框、
- * 提示訊息、渲染列表和圖表等。
- * 
- * @author BabyGrow Team
- * @version 1.0.0
- */
-
 'use strict';
 
 /**
- * 顯示應用程式
+ * @fileoverview UI 操作模組 - 負責所有 DOM 操作和 UI 更新
+ * @author BabyLog 開發團隊
+ * @version 1.0.0
  */
-export function showApp() {
-  document.getElementById('app').classList.remove('hidden');
-}
 
 /**
- * 顯示載入畫面
- * @param {string} message - 載入訊息
+ * UI 操作類
+ * 封裝所有與 DOM 相關的操作和 UI 更新
  */
-export function showLoading(message = '載入中...') {
-  const loadingScreen = document.getElementById('loading-screen');
-  const loadingContent = loadingScreen.querySelector('.loading-content p');
-  
-  loadingContent.textContent = message;
-  loadingScreen.classList.remove('hidden');
-}
-
-/**
- * 隱藏載入畫面
- */
-export function hideLoading() {
-  document.getElementById('loading-screen').classList.add('hidden');
-}
-
-/**
- * 切換側邊選單
- */
-export function toggleSideMenu() {
-  const sideMenu = document.getElementById('side-menu');
-  sideMenu.classList.toggle('hidden');
-}
-
-/**
- * 關閉側邊選單
- */
-export function closeSideMenu() {
-  document.getElementById('side-menu').classList.add('hidden');
-}
-
-/**
- * 顯示指定頁面
- * @param {string} pageName - 頁面名稱
- */
-export function showPage(pageName) {
-  // 隱藏所有頁面
-  document.querySelectorAll('.page').forEach(page => {
-    page.classList.add('hidden');
-  });
-  
-  // 顯示指定頁面
-  const targetPage = document.getElementById(`${pageName}-page`);
-  if (targetPage) {
-    targetPage.classList.remove('hidden');
-  } else {
-    console.error(`找不到頁面: ${pageName}-page`);
+class UI {
+  /**
+   * 構造函數
+   */
+  constructor() {
+    // 快取常用的 DOM 元素，避免重複查詢
+    this.elements = {
+      appContainer: null,
+      appNav: null,
+      appMain: null,
+      currentDateDisplay: null,
+      childSelector: null,
+      todaySummary: null,
+      reflectionPrompt: null,
+      reflectionInput: null,
+      childrenList: null,
+      activityTimeline: null,
+      selectedDateDisplay: null,
+      modalContainer: null,
+      toastContainer: null,
+      quickAddMenu: null
+    };
   }
-}
 
-/**
- * 更新選單活躍項目
- * @param {string} pageName - 活躍頁面名稱
- */
-export function updateMenuActiveItem(pageName) {
-  // 移除所有活躍類別
-  document.querySelectorAll('.menu-items li').forEach(item => {
-    item.classList.remove('active');
-  });
-  
-  // 添加活躍類別到當前頁面的選單項目
-  const activeItem = document.querySelector(`.menu-items li[data-page="${pageName}"]`);
-  if (activeItem) {
-    activeItem.classList.add('active');
-  }
-}
-
-/**
- * 更新頁面標題
- * @param {string} pageName - 頁面名稱
- * @param {Object} childData - 活躍子女數據（可選）
- */
-export function updatePageTitle(pageName, childData) {
-  let title = '寶貝成長日記';
-  
-  // 根據頁面名稱設置標題
-  switch (pageName) {
-    case 'welcome':
-      title = '歡迎使用';
-      break;
-    case 'dashboard':
-      title = '主頁';
-      break;
-    case 'feeding':
-      title = '餵食記錄';
-      break;
-    case 'sleep':
-      title = '睡眠記錄';
-      break;
-    case 'diaper':
-      title = '尿布記錄';
-      break;
-    case 'health':
-      title = '健康記錄';
-      break;
-    case 'milestone':
-      title = '發展里程碑';
-      break;
-    case 'interaction':
-      title = '親子互動日記';
-      break;
-    case 'mood':
-      title = '情緒與行為';
-      break;
-    case 'analysis':
-      title = '數據分析';
-      break;
-    case 'data-management':
-      title = '數據管理';
-      break;
-  }
-  
-  // 如果有子女數據，添加子女名稱
-  if (childData && childData.name) {
-    title += ` - ${childData.name}`;
-  }
-  
-  // 更新頁面標題
-  document.getElementById('page-title').textContent = title;
-}
-
-/**
- * 渲染子女列表
- * @param {Array} children - 子女數據陣列
- * @param {number|string} activeChildId - 活躍子女 ID
- * @param {Function} onChildClick - 點擊子女項目時的回調函數
- */
-export function renderChildrenList(children, activeChildId, onChildClick) {
-  const childrenList = document.getElementById('children-list');
-  
-  // 清空列表
-  childrenList.innerHTML = '';
-  
-  // 如果沒有子女，顯示提示訊息
-  if (!children || children.length === 0) {
-    const emptyMessage = document.createElement('div');
-    emptyMessage.className = 'empty-children-message';
-    emptyMessage.textContent = '尚未添加寶貝';
-    childrenList.appendChild(emptyMessage);
-    return;
-  }
-  
-  // 渲染每個子女項目
-  children.forEach(child => {
-    const childItem = document.createElement('div');
-    childItem.className = 'child-item';
+  /**
+   * 初始化 UI
+   */
+  initUI() {
+    console.log('[UI] 初始化 UI...');
     
-    // 如果是活躍子女，添加活躍類別
-    if (child.id == activeChildId) {
-      childItem.classList.add('active');
+    // 快取常用的 DOM 元素
+    this.cacheElements();
+    
+    // 設置初始日期顯示
+    this.updateCurrentDate();
+    
+    // 初始化 toast 容器
+    if (!this.elements.toastContainer) {
+      this.elements.toastContainer = document.getElementById('toastContainer');
     }
     
-    // 計算年齡
-    const ageText = calculateAgeText(child.birthday);
+    console.log('[UI] UI 初始化完成');
+  }
+
+  /**
+   * 快取常用的 DOM 元素
+   * @private
+   */
+  cacheElements() {
+    this.elements.appContainer = document.getElementById('app');
+    this.elements.appNav = document.getElementById('appNav');
+    this.elements.appMain = document.getElementById('appMain');
+    this.elements.currentDateDisplay = document.getElementById('currentDate');
+    this.elements.childSelector = document.getElementById('childSelector');
+    this.elements.todaySummary = document.getElementById('todaySummary');
+    this.elements.reflectionPrompt = document.getElementById('reflectionPrompt');
+    this.elements.reflectionInput = document.getElementById('reflectionInput');
+    this.elements.childrenList = document.getElementById('childrenList');
+    this.elements.activityTimeline = document.getElementById('activityTimeline');
+    this.elements.selectedDateDisplay = document.getElementById('selectedDate');
+    this.elements.modalContainer = document.getElementById('modalContainer');
+    this.elements.toastContainer = document.getElementById('toastContainer');
+    this.elements.quickAddMenu = document.getElementById('quickAddMenu');
+  }
+
+  /**
+   * 更新當前日期顯示
+   */
+  updateCurrentDate() {
+    if (this.elements.currentDateDisplay) {
+      const now = new Date();
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      this.elements.currentDateDisplay.textContent = now.toLocaleDateString('zh-TW', options);
+    }
+  }
+
+  /**
+   * 更新選定日期顯示
+   * @param {Date} date - 選定的日期
+   */
+  updateSelectedDate(date) {
+    if (this.elements.selectedDateDisplay) {
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      this.elements.selectedDateDisplay.textContent = date.toLocaleDateString('zh-TW', options);
+    }
+  }
+
+  /**
+   * 顯示歡迎視圖
+   */
+  showWelcomeView() {
+    this.changeView('welcome');
+  }
+
+  /**
+   * 更改視圖
+   * @param {string} viewName - 視圖名稱
+   */
+  changeView(viewName) {
+    // 隱藏所有視圖
+    const views = document.querySelectorAll('.app-view');
+    views.forEach(view => {
+      view.classList.remove('active-view');
+    });
     
-    // 創建子女頭像
-    const avatar = document.createElement('div');
-    avatar.className = 'child-avatar';
+    // 顯示指定的視圖
+    let viewElement;
     
-    if (child.photo) {
-      // 如果有照片，使用照片
-      const img = document.createElement('img');
-      img.src = child.photo;
-      img.alt = child.name;
-      avatar.appendChild(img);
+    if (viewName === 'welcome') {
+      viewElement = document.getElementById('welcomeView');
     } else {
-      // 如果沒有照片，使用首字母
-      avatar.textContent = child.name.charAt(0);
-      
-      // 根據性別設置不同的背景色
-      if (child.gender === 'male') {
-        avatar.classList.add('male');
-      } else if (child.gender === 'female') {
-        avatar.classList.add('female');
-      }
+      viewElement = document.getElementById(`${viewName}View`);
     }
     
-    // 創建子女資訊
-    const info = document.createElement('div');
-    info.className = 'child-info';
+    if (viewElement) {
+      viewElement.classList.add('active-view');
+    } else {
+      console.warn(`[UI] 找不到視圖元素: ${viewName}View`);
+    }
     
-    const name = document.createElement('div');
-    name.className = 'child-name';
-    name.textContent = child.name;
+    // 關閉側邊選單（如果打開）
+    this.toggleMenu(false);
     
-    const age = document.createElement('div');
-    age.className = 'child-age';
-    age.textContent = ageText;
-    
-    info.appendChild(name);
-    info.appendChild(age);
-    
-    // 組裝子女項目
-    childItem.appendChild(avatar);
-    childItem.appendChild(info);
-    
-    // 添加點擊事件
-    childItem.addEventListener('click', () => {
-      onChildClick(child.id);
+    console.log(`[UI] 已切換到視圖: ${viewName}`);
+  }
+
+  /**
+   * 切換選單顯示狀態
+   * @param {boolean} [show] - 是否顯示選單，未指定則切換當前狀態
+   */
+  toggleMenu(show) {
+    if (this.elements.appNav) {
+      if (show === undefined) {
+        // 切換當前狀態
+        this.elements.appNav.classList.toggle('active');
+        this.elements.appContainer.classList.toggle('menu-active');
+      } else if (show) {
+        // 顯示選單
+        this.elements.appNav.classList.add('active');
+        this.elements.appContainer.classList.add('menu-active');
+      } else {
+        // 隱藏選單
+        this.elements.appNav.classList.remove('active');
+        this.elements.appContainer.classList.remove('menu-active');
+      }
+    }
+  }
+
+  /**
+   * 切換快速添加選單顯示狀態
+   * @param {boolean} [show] - 是否顯示選單，未指定則切換當前狀態
+   */
+  toggleQuickAddMenu(show) {
+    if (this.elements.quickAddMenu) {
+      if (show === undefined) {
+        // 切換當前狀態
+        this.elements.quickAddMenu.classList.toggle('active');
+      } else if (show) {
+        // 顯示選單
+        this.elements.quickAddMenu.classList.add('active');
+      } else {
+        // 隱藏選單
+        this.elements.quickAddMenu.classList.remove('active');
+      }
+    }
+  }
+
+  /**
+   * 更新活動導航項目
+   * @param {string} viewName - 活動視圖的名稱
+   */
+  updateActiveNavItem(viewName) {
+    // 更新側邊選單中的活動項目
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.classList.remove('active');
+      if (item.dataset.view === viewName) {
+        item.classList.add('active');
+      }
     });
     
-    // 添加到列表
-    childrenList.appendChild(childItem);
-  });
-}
-
-/**
- * 更新活躍子女顯示
- * @param {Object} childData - 活躍子女數據
- */
-export function updateActiveChildDisplay(childData) {
-  if (!childData) return;
-  
-  const activeChildProfile = document.getElementById('active-child-profile');
-  
-  // 創建內容
-  const ageText = calculateAgeText(childData.birthday);
-  
-  activeChildProfile.innerHTML = `
-    <div class="profile-header-content">
-      <div class="child-avatar ${childData.gender}">
-        ${childData.photo ? `<img src="${childData.photo}" alt="${childData.name}">` : childData.name.charAt(0)}
-      </div>
-      <div class="profile-info">
-        <h2>${childData.name}</h2>
-        <p>${ageText}</p>
-      </div>
-    </div>
-  `;
-}
-
-/**
- * 渲染今日概覽
- * @param {Object} todayData - 今日數據
- */
-export function renderTodaySummary(todayData) {
-  const summaryContent = document.getElementById('today-summary-content');
-  
-  // 計算摘要統計
-  const feedingCount = todayData.feedings ? todayData.feedings.length : 0;
-  
-  // 計算總睡眠時間（分鐘）
-  let totalSleepMinutes = 0;
-  if (todayData.sleep && todayData.sleep.length > 0) {
-    todayData.sleep.forEach(record => {
-      if (record.startTime && record.endTime) {
-        totalSleepMinutes += (record.endTime - record.startTime) / (60 * 1000);
+    // 更新底部導航中的活動項目
+    document.querySelectorAll('.footer-nav-item').forEach(item => {
+      item.classList.remove('active');
+      if (item.dataset.view === viewName) {
+        item.classList.add('active');
       }
     });
   }
-  
-  // 計算尿布更換次數
-  const diaperCount = todayData.diapers ? todayData.diapers.length : 0;
-  
-  // 格式化睡眠時間
-  const sleepHours = Math.floor(totalSleepMinutes / 60);
-  const sleepMinutes = Math.round(totalSleepMinutes % 60);
-  const sleepText = totalSleepMinutes > 0 
-    ? `${sleepHours}小時 ${sleepMinutes}分鐘`
-    : '尚無記錄';
-  
-  // 創建摘要卡片
-  summaryContent.innerHTML = `
-    <div class="summary-card">
-      <div class="card-icon">
-        <i class="fas fa-utensils"></i>
-      </div>
-      <div class="card-content">
-        <h4>餵食</h4>
-        <p class="card-value">${feedingCount} 次</p>
-      </div>
-    </div>
-    
-    <div class="summary-card">
-      <div class="card-icon">
-        <i class="fas fa-moon"></i>
-      </div>
-      <div class="card-content">
-        <h4>睡眠</h4>
-        <p class="card-value">${sleepText}</p>
-      </div>
-    </div>
-    
-    <div class="summary-card">
-      <div class="card-icon">
-        <i class="fas fa-baby"></i>
-      </div>
-      <div class="card-content">
-        <h4>尿布</h4>
-        <p class="card-value">${diaperCount} 次</p>
-      </div>
-    </div>
-  `;
-}
 
-/**
- * 渲染近期活動
- * @param {Array} activities - 活動數據陣列
- */
-export function renderRecentActivities(activities) {
-  const activitiesList = document.getElementById('recent-activities-list');
-  
-  // 清空列表
-  activitiesList.innerHTML = '';
-  
-  // 如果沒有活動，顯示提示訊息
-  if (!activities || activities.length === 0) {
-    activitiesList.innerHTML = `
-      <div class="empty-list-message">
-        <p>尚無近期活動</p>
-        <p>使用上方的「快速記錄」按鈕開始記錄寶寶的活動</p>
+  /**
+   * 渲染孩子選擇器
+   * @param {Array} children - 孩子數據數組
+   * @param {string|number} selectedChildId - 選定的孩子 ID
+   */
+  renderChildSelector(children, selectedChildId) {
+    if (!this.elements.childSelector) return;
+    
+    if (!children || children.length === 0) {
+      this.elements.childSelector.innerHTML = `
+        <div class="no-children-message">
+          <p>尚未添加任何孩子</p>
+          <button id="addFirstChildButton" class="secondary-button">添加孩子</button>
+        </div>
+      `;
+      
+      // 綁定添加第一個孩子按鈕
+      const addFirstChildButton = document.getElementById('addFirstChildButton');
+      if (addFirstChildButton) {
+        addFirstChildButton.addEventListener('click', () => {
+          // 使用自定義事件觸發，讓 App 類處理
+          const event = new CustomEvent('addFirstChild');
+          document.dispatchEvent(event);
+        });
+      }
+      
+      return;
+    }
+    
+    let html = '<div class="child-select-list">';
+    
+    children.forEach(child => {
+      const isSelected = selectedChildId && child.id.toString() === selectedChildId.toString();
+      
+      html += `
+        <div class="child-select-item ${isSelected ? 'selected' : ''}" data-child-id="${child.id}">
+          <div class="child-avatar">
+            ${child.photo ? `<img src="${child.photo}" alt="${child.name}">` : `<div class="avatar-placeholder">${child.name.charAt(0)}</div>`}
+          </div>
+          <div class="child-info">
+            <h3>${child.name}</h3>
+            <p>${this.calculateAge(child.birthDate)}</p>
+          </div>
+        </div>
+      `;
+    });
+    
+    html += '</div>';
+    
+    this.elements.childSelector.innerHTML = html;
+  }
+
+  /**
+   * 計算年齡
+   * @param {string} birthDate - 出生日期（格式：YYYY-MM-DD）
+   * @returns {string} 格式化的年齡字符串
+   * @private
+   */
+  calculateAge(birthDate) {
+    const birth = new Date(birthDate);
+    const now = new Date();
+    
+    let years = now.getFullYear() - birth.getFullYear();
+    let months = now.getMonth() - birth.getMonth();
+    
+    if (months < 0 || (months === 0 && now.getDate() < birth.getDate())) {
+      years--;
+      months += 12;
+    }
+    
+    // 如果不足一個月，顯示天數
+    if (years === 0 && months === 0) {
+      const days = Math.floor((now - birth) / (1000 * 60 * 60 * 24));
+      return `${days} 天`;
+    }
+    
+    // 如果不足一年，只顯示月份
+    if (years === 0) {
+      return `${months} 個月`;
+    }
+    
+    // 顯示年和月
+    return `${years} 歲 ${months} 個月`;
+  }
+
+  /**
+   * 更新選定的孩子
+   * @param {string|number} childId - 孩子 ID
+   */
+  updateSelectedChild(childId) {
+    // 更新孩子選擇器中的選定狀態
+    if (this.elements.childSelector) {
+      const items = this.elements.childSelector.querySelectorAll('.child-select-item');
+      items.forEach(item => {
+        item.classList.remove('selected');
+        if (item.dataset.childId === childId.toString()) {
+          item.classList.add('selected');
+        }
+      });
+    }
+  }
+
+  /**
+   * 渲染今日摘要
+   * @param {Object|null} data - 包含餵食、睡眠和尿布記錄的數據對象，null 表示清空
+   */
+  renderTodaySummary(data) {
+    if (!this.elements.todaySummary) return;
+    
+    if (!data) {
+      this.elements.todaySummary.innerHTML = `
+        <div class="placeholder-content">
+          <p>選擇一個孩子來查看今日摘要</p>
+        </div>
+      `;
+      return;
+    }
+    
+    // 獲取數據
+    const { feeding = [], sleep = [], diaper = [] } = data;
+    
+    // 計算統計數據
+    const feedingCount = feeding.length;
+    const sleepMinutes = sleep.reduce((total, record) => {
+      const start = record.startTime;
+      const end = record.endTime || Date.now();
+      return total + Math.floor((end - start) / (1000 * 60));
+    }, 0);
+    const diaperCount = diaper.length;
+    
+    // 格式化睡眠時間
+    const sleepHours = Math.floor(sleepMinutes / 60);
+    const sleepRemainingMinutes = sleepMinutes % 60;
+    const sleepTimeFormatted = sleepHours > 0 
+      ? `${sleepHours} 小時 ${sleepRemainingMinutes} 分鐘` 
+      : `${sleepRemainingMinutes} 分鐘`;
+    
+    // 創建 HTML
+    let html = `
+      <div class="summary-stats">
+        <div class="stat-item">
+          <div class="stat-icon"><i class="fas fa-utensils"></i></div>
+          <div class="stat-value">${feedingCount}</div>
+          <div class="stat-label">餵食</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon"><i class="fas fa-moon"></i></div>
+          <div class="stat-value">${sleepHours}h ${sleepRemainingMinutes}m</div>
+          <div class="stat-label">睡眠</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon"><i class="fas fa-baby"></i></div>
+          <div class="stat-value">${diaperCount}</div>
+          <div class="stat-label">尿布</div>
+        </div>
       </div>
     `;
-    return;
+    
+    // 最近活動列表
+    html += '<div class="recent-activities">';
+    html += '<h4>最近活動</h4>';
+    
+    // 合併所有活動並按時間排序
+    const allActivities = [
+      ...feeding.map(f => ({ type: 'feeding', data: f, time: f.timestamp })),
+      ...sleep.map(s => ({ type: 'sleep', data: s, time: s.startTime })),
+      ...diaper.map(d => ({ type: 'diaper', data: d, time: d.timestamp }))
+    ].sort((a, b) => b.time - a.time); // 按時間降序排列
+    
+    if (allActivities.length === 0) {
+      html += '<p class="no-activities">今天還沒有記錄活動</p>';
+    } else {
+      html += '<ul class="activity-list">';
+      
+      // 只顯示最近的 5 個活動
+      const recentActivities = allActivities.slice(0, 5);
+      
+      recentActivities.forEach(activity => {
+        const time = new Date(activity.time);
+        const formattedTime = time.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+        
+        let activityText = '';
+        let activityIcon = '';
+        
+        switch (activity.type) {
+          case 'feeding':
+            activityIcon = 'fas fa-utensils';
+            activityText = `餵食 - ${activity.data.type === 'breast' ? '母乳' : (activity.data.type === 'formula' ? '配方奶' : '副食品')}`;
+            if (activity.data.amount) {
+              activityText += ` (${activity.data.amount} ${activity.data.unit || 'ml'})`;
+            }
+            break;
+          case 'sleep':
+            activityIcon = 'fas fa-moon';
+            if (activity.data.endTime) {
+              const durationMinutes = Math.floor((activity.data.endTime - activity.data.startTime) / (1000 * 60));
+              const hours = Math.floor(durationMinutes / 60);
+              const minutes = durationMinutes % 60;
+              activityText = `睡眠 - ${hours > 0 ? `${hours}小時` : ''}${minutes}分鐘`;
+            } else {
+              activityText = '睡眠開始';
+            }
+            break;
+          case 'diaper':
+            activityIcon = 'fas fa-baby';
+            activityText = `尿布 - ${activity.data.type === 'wet' ? '尿濕' : (activity.data.type === 'dirty' ? '排便' : '混合')}`;
+            break;
+        }
+        
+        html += `
+          <li class="activity-item">
+            <div class="activity-time">${formattedTime}</div>
+            <div class="activity-content">
+              <i class="${activityIcon}"></i>
+              <span>${activityText}</span>
+            </div>
+          </li>
+        `;
+      });
+      
+      html += '</ul>';
+    }
+    
+    html += '</div>'; // 結束 recent-activities
+    
+    this.elements.todaySummary.innerHTML = html;
   }
-  
-  // 渲染每個活動項目
-  activities.forEach(activity => {
-    const activityItem = document.createElement('div');
-    activityItem.className = 'activity-item';
+
+  /**
+   * 更新反思提示
+   * @param {string} prompt - 反思提示文本
+   */
+  updateReflectionPrompt(prompt) {
+    if (this.elements.reflectionPrompt) {
+      this.elements.reflectionPrompt.textContent = prompt;
+    }
+  }
+
+  /**
+   * 渲染孩子列表
+   * @param {Array} children - 孩子數據數組
+   */
+  renderChildrenList(children) {
+    if (!this.elements.childrenList) return;
     
-    // 獲取時間戳
-    const timestamp = activity.timestamp || activity.startTime || activity.date;
-    const dateObj = new Date(timestamp);
+    if (!children || children.length === 0) {
+      this.elements.childrenList.innerHTML = `
+        <div class="placeholder-content">
+          <p>尚未添加任何孩子</p>
+        </div>
+      `;
+      return;
+    }
     
-    // 格式化日期和時間
-    const formattedDate = formatDate(dateObj);
-    const formattedTime = formatTime(dateObj);
+    let html = '';
     
-    // 根據活動類型設置圖標和標題
-    let icon, title, details;
+    children.forEach(child => {
+      const birthDate = new Date(child.birthDate);
+      const formattedBirthDate = birthDate.toLocaleDateString('zh-TW');
+      const age = this.calculateAge(child.birthDate);
+      
+      html += `
+        <div class="child-item" data-child-id="${child.id}">
+          <div class="child-item-header">
+            <div class="child-avatar">
+              ${child.photo ? `<img src="${child.photo}" alt="${child.name}">` : `<div class="avatar-placeholder">${child.name.charAt(0)}</div>`}
+            </div>
+            <div class="child-info">
+              <h3>${child.name}</h3>
+              <p>${age}</p>
+              <p>出生日期：${formattedBirthDate}</p>
+            </div>
+            <button class="child-item-edit" aria-label="編輯">
+              <i class="fas fa-edit"></i>
+            </button>
+          </div>
+        </div>
+      `;
+    });
     
-    switch (activity.type) {
-      case 'feeding':
-        icon = 'fa-utensils';
-        title = '餵食';
-        details = `${activity.method} - ${activity.amount} ${activity.unit}`;
+    this.elements.childrenList.innerHTML = html;
+  }
+
+  /**
+   * 渲染活動時間軸
+   * @param {Object|null} data - 包含餵食、睡眠和尿布記錄的數據對象，null 表示清空
+   */
+  renderActivityTimeline(data) {
+    if (!this.elements.activityTimeline) return;
+    
+    if (!data) {
+      this.elements.activityTimeline.innerHTML = `
+        <div class="placeholder-content">
+          <p>選擇一個孩子和日期來查看活動</p>
+        </div>
+      `;
+      return;
+    }
+    
+    // 獲取數據
+    const { feeding = [], sleep = [], diaper = [] } = data;
+    
+    // 合併所有活動並按時間排序
+    const allActivities = [
+      ...feeding.map(f => ({ type: 'feeding', data: f, time: f.timestamp })),
+      ...sleep.map(s => ({ type: 'sleep', data: s, time: s.startTime })),
+      ...diaper.map(d => ({ type: 'diaper', data: d, time: d.timestamp }))
+    ].sort((a, b) => a.time - b.time); // 按時間升序排列
+    
+    if (allActivities.length === 0) {
+      this.elements.activityTimeline.innerHTML = `
+        <div class="no-activities">
+          <p>這一天沒有記錄活動</p>
+          <button id="addActivityButton" class="secondary-button">添加活動</button>
+        </div>
+      `;
+      
+      // 綁定添加活動按鈕
+      const addActivityButton = document.getElementById('addActivityButton');
+      if (addActivityButton) {
+        addActivityButton.addEventListener('click', () => {
+          // 使用自定義事件觸發，讓 App 類處理
+          const event = new CustomEvent('addActivity');
+          document.dispatchEvent(event);
+        });
+      }
+      
+      return;
+    }
+    
+    let html = '<div class="timeline">';
+    
+    allActivities.forEach((activity, index) => {
+      const time = new Date(activity.time);
+      const formattedTime = time.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+      
+      let activityContent = '';
+      let activityIcon = '';
+      let activityClass = '';
+      
+      switch (activity.type) {
+        case 'feeding':
+          activityIcon = 'fas fa-utensils';
+          activityClass = 'feeding-activity';
+          
+          let feedingType = '';
+          switch (activity.data.type) {
+            case 'breast':
+              feedingType = '母乳';
+              break;
+            case 'formula':
+              feedingType = '配方奶';
+              break;
+            case 'solid':
+              feedingType = '副食品';
+              break;
+            default:
+              feedingType = '餵食';
+          }
+          
+          activityContent = `
+            <div class="activity-details">
+              <h4>${feedingType}</h4>
+              ${activity.data.amount ? `<p>份量: ${activity.data.amount} ${activity.data.unit || 'ml'}</p>` : ''}
+              ${activity.data.notes ? `<p>備註: ${activity.data.notes}</p>` : ''}
+            </div>
+          `;
+          break;
+          
+        case 'sleep':
+          activityIcon = 'fas fa-moon';
+          activityClass = 'sleep-activity';
+          
+          let sleepContent = '';
+          if (activity.data.endTime) {
+            const durationMinutes = Math.floor((activity.data.endTime - activity.data.startTime) / (1000 * 60));
+            const hours = Math.floor(durationMinutes / 60);
+            const minutes = durationMinutes % 60;
+            const endTime = new Date(activity.data.endTime);
+            const formattedEndTime = endTime.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+            
+            sleepContent = `
+              <p>開始: ${formattedTime}</p>
+              <p>結束: ${formattedEndTime}</p>
+              <p>時長: ${hours > 0 ? `${hours}小時` : ''}${minutes}分鐘</p>
+            `;
+          } else {
+            sleepContent = `
+              <p>開始: ${formattedTime}</p>
+              <p>狀態: 睡眠中</p>
+            `;
+          }
+          
+          activityContent = `
+            <div class="activity-details">
+              <h4>睡眠</h4>
+              ${sleepContent}
+              ${activity.data.notes ? `<p>備註: ${activity.data.notes}</p>` : ''}
+            </div>
+          `;
+          break;
+          
+        case 'diaper':
+          activityIcon = 'fas fa-baby';
+          activityClass = 'diaper-activity';
+          
+          let diaperType = '';
+          switch (activity.data.type) {
+            case 'wet':
+              diaperType = '尿濕';
+              break;
+            case 'dirty':
+              diaperType = '排便';
+              break;
+            case 'mixed':
+              diaperType = '混合';
+              break;
+            default:
+              diaperType = '尿布更換';
+          }
+          
+          activityContent = `
+            <div class="activity-details">
+              <h4>${diaperType}</h4>
+              ${activity.data.notes ? `<p>備註: ${activity.data.notes}</p>` : ''}
+            </div>
+          `;
+          break;
+      }
+      
+      html += `
+        <div class="timeline-item ${activityClass}" data-activity-id="${activity.data.id}" data-activity-type="${activity.type}">
+          <div class="timeline-time">${formattedTime}</div>
+          <div class="timeline-icon"><i class="${activityIcon}"></i></div>
+          <div class="timeline-content">
+            ${activityContent}
+            <div class="timeline-actions">
+              <button class="edit-activity" data-id="${activity.data.id}" data-type="${activity.type}">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="delete-activity" data-id="${activity.data.id}" data-type="${activity.type}">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+    
+    html += '</div>'; // 結束 timeline
+    
+    this.elements.activityTimeline.innerHTML = html;
+    
+    // 綁定編輯和刪除按鈕的事件
+    document.querySelectorAll('.edit-activity').forEach(button => {
+      button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = e.currentTarget.dataset.id;
+        const type = e.currentTarget.dataset.type;
+        
+        // 使用自定義事件觸發，讓 App 類處理
+        const event = new CustomEvent('editActivity', { 
+          detail: { id, type } 
+        });
+        document.dispatchEvent(event);
+      });
+    });
+    
+    document.querySelectorAll('.delete-activity').forEach(button => {
+      button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = e.currentTarget.dataset.id;
+        const type = e.currentTarget.dataset.type;
+        
+        // 使用自定義事件觸發，讓 App 類處理
+        const event = new CustomEvent('deleteActivity', { 
+          detail: { id, type } 
+        });
+        document.dispatchEvent(event);
+      });
+    });
+  }
+
+  /**
+   * 顯示模態窗口
+   * @param {string} content - 窗口內容 HTML
+   * @param {string} [className] - 額外的 CSS 類名
+   */
+  showModal(content, className = '') {
+    if (!this.elements.modalContainer) return;
+    
+    // 創建模態窗口
+    const modalHtml = `
+      <div class="modal-backdrop"></div>
+      <div class="modal-dialog ${className}">
+        <div class="modal-content">
+          ${content}
+        </div>
+      </div>
+    `;
+    
+    this.elements.modalContainer.innerHTML = modalHtml;
+    this.elements.modalContainer.classList.add('active');
+    
+    // 綁定背景點擊關閉事件
+    const backdrop = this.elements.modalContainer.querySelector('.modal-backdrop');
+    if (backdrop) {
+      backdrop.addEventListener('click', () => {
+        this.closeModal();
+      });
+    }
+    
+    // 防止滾動
+    document.body.style.overflow = 'hidden';
+  }
+
+  /**
+   * 關閉模態窗口
+   */
+  closeModal() {
+    if (!this.elements.modalContainer) return;
+    
+    this.elements.modalContainer.classList.remove('active');
+    this.elements.modalContainer.innerHTML = '';
+    
+    // 恢復滾動
+    document.body.style.overflow = '';
+  }
+
+  /**
+   * 顯示提示消息
+   * @param {string} message - 消息文本
+   * @param {string} [type='info'] - 消息類型：'info', 'success', 'warning', 'error'
+   * @param {number} [duration=3000] - 顯示時間（毫秒）
+   */
+  showToast(message, type = 'info', duration = 3000) {
+    if (!this.elements.toastContainer) return;
+    
+    // 創建提示元素
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    
+    // 設置圖標
+    let icon = '';
+    switch (type) {
+      case 'success':
+        icon = '<i class="fas fa-check-circle"></i>';
         break;
-      case 'sleep':
-        icon = 'fa-moon';
-        title = '睡眠';
-        // 計算睡眠時長
-        const endTime = new Date(activity.endTime);
-        const durationMinutes = (activity.endTime - activity.startTime) / (60 * 1000);
-        details = `睡眠時長: ${Math.floor(durationMinutes / 60)}小時 ${Math.round(durationMinutes % 60)}分鐘`;
+      case 'warning':
+        icon = '<i class="fas fa-exclamation-triangle"></i>';
         break;
-      case 'diaper':
-        icon = 'fa-baby';
-        title = '尿布更換';
-        details = `${activity.type} - ${activity.condition}`;
-        break;
-      case 'health':
-        icon = 'fa-heartbeat';
-        title = '健康記錄';
-        details = activity.notes || '健康檢查';
-        break;
-      case 'milestone':
-        icon = 'fa-star';
-        title = '里程碑';
-        details = activity.milestone;
-        break;
-      case 'mood':
-        icon = 'fa-smile';
-        title = '情緒記錄';
-        details = `情緒: ${activity.mood} - ${activity.notes || ''}`;
-        break;
-      case 'interaction':
-        icon = 'fa-heart';
-        title = '親子互動';
-        details = activity.title || '互動日記';
+      case 'error':
+        icon = '<i class="fas fa-times-circle"></i>';
         break;
       default:
-        icon = 'fa-calendar-check';
-        title = '活動';
-        details = '詳情';
+        icon = '<i class="fas fa-info-circle"></i>';
     }
     
-    // 創建活動卡片內容
-    activityItem.innerHTML = `
-      <div class="activity-icon">
-        <i class="fas ${icon}"></i>
-      </div>
-      <div class="activity-details">
-        <div class="activity-header">
-          <h4>${title}</h4>
-          <span class="activity-time">${formattedTime}</span>
-        </div>
-        <p class="activity-description">${details}</p>
-        <div class="activity-date">${formattedDate}</div>
-      </div>
-    `;
-    
-    // 添加到列表
-    activitiesList.appendChild(activityItem);
-  });
-}
-
-/**
- * 渲染每週趨勢圖表
- * @param {Object} data - 圖表數據
- */
-export function renderWeeklyChart(data) {
-  // 檢查是否已載入 Chart.js
-  if (!window.Chart) {
-    console.error('Chart.js 未載入，無法渲染圖表');
-    return;
-  }
-  
-  // 獲取圖表容器
-  const canvas = document.getElementById('weekly-chart');
-  if (!canvas) return;
-  
-  // 清除現有圖表
-  if (window.weeklyChart) {
-    window.weeklyChart.destroy();
-  }
-  
-  // 創建圖表
-  window.weeklyChart = new Chart(canvas, {
-    type: 'bar',
-    data: {
-      labels: data.labels,
-      datasets: [
-        {
-          label: '餵食次數',
-          data: data.feedingCounts,
-          backgroundColor: 'rgba(255, 159, 64, 0.6)',
-          borderColor: 'rgba(255, 159, 64, 1)',
-          borderWidth: 1,
-          yAxisID: 'y-axis-1'
-        },
-        {
-          label: '睡眠時數',
-          data: data.sleepHours,
-          backgroundColor: 'rgba(54, 162, 235, 0.6)',
-          borderColor: 'rgba(54, 162, 235, 1)',
-          borderWidth: 1,
-          yAxisID: 'y-axis-2',
-          type: 'line',
-          fill: false
-        },
-        {
-          label: '尿布次數',
-          data: data.diaperCounts,
-          backgroundColor: 'rgba(75, 192, 192, 0.6)',
-          borderColor: 'rgba(75, 192, 192, 1)',
-          borderWidth: 1,
-          yAxisID: 'y-axis-1'
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        yAxes: [
-          {
-            id: 'y-axis-1',
-            type: 'linear',
-            position: 'left',
-            ticks: {
-              beginAtZero: true,
-              stepSize: 1
-            },
-            scaleLabel: {
-              display: true,
-              labelString: '次數'
-            }
-          },
-          {
-            id: 'y-axis-2',
-            type: 'linear',
-            position: 'right',
-            ticks: {
-              beginAtZero: true
-            },
-            scaleLabel: {
-              display: true,
-              labelString: '睡眠時數'
-            },
-            gridLines: {
-              drawOnChartArea: false
-            }
-          }
-        ]
-      },
-      title: {
-        display: true,
-        text: '過去一週趨勢'
-      },
-      legend: {
-        position: 'top'
-      },
-      tooltips: {
-        mode: 'index',
-        intersect: false
-      }
-    }
-  });
-}
-
-/**
- * 渲染親子反思
- * @param {Array} reflections - 反思數據陣列
- */
-export function renderParentReflections(reflections) {
-  const reflectionsContainer = document.getElementById('parent-reflections');
-  
-  // 清空容器
-  reflectionsContainer.innerHTML = '';
-  
-  // 如果沒有反思，顯示提示訊息
-  if (!reflections || reflections.length === 0) {
-    reflectionsContainer.innerHTML = `
-      <div class="empty-list-message">
-        <p>尚無親子時刻反思</p>
-        <p>記錄您與寶寶共度的珍貴時光和感受，幫助您成為更好的父母</p>
-      </div>
-    `;
-    return;
-  }
-  
-  // 最多顯示 3 條反思
-  const displayReflections = reflections.slice(0, 3);
-  
-  // 渲染每條反思
-  displayReflections.forEach(reflection => {
-    const reflectionDate = new Date(reflection.date);
-    const formattedDate = formatDate(reflectionDate);
-    
-    const reflectionItem = document.createElement('div');
-    reflectionItem.className = 'reflection-item';
-    
-    reflectionItem.innerHTML = `
-      <div class="reflection-date">${formattedDate}</div>
-      <div class="reflection-content">
-        <p>${reflection.parentReflection}</p>
-      </div>
-      ${reflection.prompt ? `<div class="reflection-prompt-tag">${reflection.prompt}</div>` : ''}
-    `;
-    
-    reflectionsContainer.appendChild(reflectionItem);
-  });
-}
-
-/**
- * 渲染分析圖表
- * @param {string} analysisType - 分析類型
- * @param {string} period - 時間週期
- * @param {Object} data - 圖表數據
- */
-export function renderAnalysisChart(analysisType, period, data) {
-  // 具體實現會根據分析類型和資料結構有所不同
-  // 這裡提供一個基本框架
-  
-  // 獲取圖表容器
-  const canvas = document.getElementById('analysis-chart');
-  if (!canvas) return;
-  
-  // 清除現有圖表
-  if (window.analysisChart) {
-    window.analysisChart.destroy();
-  }
-  
-  // 根據分析類型準備圖表數據和配置
-  let chartConfig;
-  
-  switch (analysisType) {
-    case 'feeding':
-      // 實現餵食分析圖表
-      chartConfig = createFeedingAnalysisChart(data, period);
-      break;
-    case 'sleep':
-      // 實現睡眠分析圖表
-      chartConfig = createSleepAnalysisChart(data, period);
-      break;
-    case 'health':
-      // 實現健康分析圖表
-      chartConfig = createHealthAnalysisChart(data, period);
-      break;
-    case 'mood':
-      // 實現情緒分析圖表
-      chartConfig = createMoodAnalysisChart(data, period);
-      break;
-    case 'development':
-      // 實現發展分析圖表
-      chartConfig = createDevelopmentAnalysisChart(data, period);
-      break;
-    default:
-      // 預設圖表
-      chartConfig = {
-        type: 'bar',
-        data: {
-          labels: ['無數據'],
-          datasets: [{
-            label: '無數據',
-            data: [0],
-            backgroundColor: 'rgba(200, 200, 200, 0.6)'
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          title: {
-            display: true,
-            text: '無有效數據'
-          }
-        }
-      };
-  }
-  
-  // 創建圖表
-  window.analysisChart = new Chart(canvas, chartConfig);
-}
-
-/**
- * 渲染分析洞見
- * @param {Array} insights - 洞見數據陣列
- */
-export function renderAnalysisInsights(insights) {
-  const insightsContainer = document.getElementById('analysis-insights');
-  
-  // 清空容器
-  insightsContainer.innerHTML = '';
-  
-  // 如果沒有洞見，顯示提示訊息
-  if (!insights || insights.length === 0) {
-    insightsContainer.innerHTML = `
-      <div class="empty-insights-message">
-        <p>無法生成洞見</p>
-        <p>請確保您有足夠的數據記錄</p>
-      </div>
-    `;
-    return;
-  }
-  
-  // 添加標題
-  const insightsTitle = document.createElement('h3');
-  insightsTitle.textContent = '數據洞見';
-  insightsContainer.appendChild(insightsTitle);
-  
-  // 渲染每條洞見
-  insights.forEach(insight => {
-    const insightItem = document.createElement('div');
-    insightItem.className = 'insight-item';
-    
-    insightItem.innerHTML = `
-      <h4>${insight.title}</h4>
-      <p>${insight.content}</p>
-    `;
-    
-    insightsContainer.appendChild(insightItem);
-  });
-}
-
-/**
- * 顯示模態對話框
- * @param {string} content - 對話框內容 HTML
- * @param {Object} options - 選項
- */
-export function showModal(content, options = {}) {
-  const modalContainer = document.getElementById('modal-container');
-  
-  // 設置預設選項
-  const defaultOptions = {
-    closeOnOverlayClick: true,
-    showCloseButton: true,
-    className: ''
-  };
-  
-  const finalOptions = { ...defaultOptions, ...options };
-  
-  // 創建模態對話框內容
-  const modal = document.createElement('div');
-  modal.className = `modal ${finalOptions.className}`;
-  
-  // 添加關閉按鈕
-  let closeButton = '';
-  if (finalOptions.showCloseButton) {
-    closeButton = `
-      <button class="modal-close" aria-label="關閉">
-        <i class="fas fa-times"></i>
-      </button>
-    `;
-  }
-  
-  // 設置模態對話框內容
-  modal.innerHTML = `
-    ${closeButton}
-    <div class="modal-content">
-      ${content}
-    </div>
-  `;
-  
-  // 清空並添加到容器
-  modalContainer.innerHTML = '';
-  modalContainer.appendChild(modal);
-  
-  // 顯示模態對話框
-  modalContainer.classList.remove('hidden');
-  
-  // 綁定關閉事件
-  if (finalOptions.showCloseButton) {
-    modal.querySelector('.modal-close').addEventListener('click', () => {
-      hideModal();
-    });
-  }
-  
-  // 點擊遮罩關閉
-  if (finalOptions.closeOnOverlayClick) {
-    modalContainer.addEventListener('click', (e) => {
-      if (e.target === modalContainer) {
-        hideModal();
-      }
-    });
-  }
-  
-  // 禁止背景滾動
-  document.body.classList.add('modal-open');
-  
-  return {
-    modalContainer,
-    modal
-  };
-}
-
-/**
- * 隱藏模態對話框
- */
-export function hideModal() {
-  const modalContainer = document.getElementById('modal-container');
-  modalContainer.classList.add('hidden');
-  document.body.classList.remove('modal-open');
-}
-
-/**
- * 顯示新增子女表單模態對話框
- * @param {Function} onSubmit - 表單提交回調函數
- */
-export function showAddChildModal(onSubmit) {
-  const content = `
-    <div class="modal-header">
-      <h2>添加新寶貝</h2>
-    </div>
-    <form id="add-child-form" class="modal-form">
-      <div class="form-group">
-        <label for="child-name">寶貝名稱 <span class="required">*</span></label>
-        <input type="text" id="child-name" name="name" required>
-      </div>
-      
-      <div class="form-group">
-        <label for="child-birthday">出生日期 <span class="required">*</span></label>
-        <input type="date" id="child-birthday" name="birthday" required>
-      </div>
-      
-      <div class="form-group">
-        <label>性別</label>
-        <div class="radio-group">
-          <label class="radio-label">
-            <input type="radio" name="gender" value="male" checked>
-            <span>男寶寶</span>
-          </label>
-          <label class="radio-label">
-            <input type="radio" name="gender" value="female">
-            <span>女寶寶</span>
-          </label>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <label for="child-photo">寶貝照片</label>
-        <input type="file" id="child-photo" name="photo" accept="image/*">
-        <div id="photo-preview" class="photo-preview hidden"></div>
-      </div>
-      
-      <div class="form-group">
-        <label for="child-notes">備註</label>
-        <textarea id="child-notes" name="notes" rows="3"></textarea>
-      </div>
-      
-      <div class="form-actions">
-        <button type="button" class="secondary-button cancel-button">取消</button>
-        <button type="submit" class="primary-button">添加寶貝</button>
-      </div>
-    </form>
-  `;
-  
-  const { modal } = showModal(content, { className: 'add-child-modal' });
-  
-  // 處理照片預覽
-  const photoInput = modal.querySelector('#child-photo');
-  const photoPreview = modal.querySelector('#photo-preview');
-  
-  photoInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        photoPreview.innerHTML = `<img src="${event.target.result}" alt="照片預覽">`;
-        photoPreview.classList.remove('hidden');
-      };
-      reader.readAsDataURL(file);
-    } else {
-      photoPreview.innerHTML = '';
-      photoPreview.classList.add('hidden');
-    }
-  });
-  
-  // 綁定表單提交事件
-  const form = modal.querySelector('#add-child-form');
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    // 獲取表單數據
-    const formData = new FormData(form);
-    const childData = {
-      name: formData.get('name'),
-      gender: formData.get('gender'),
-      notes: formData.get('notes') || ''
-    };
-    
-    // 處理生日
-    const birthdayStr = formData.get('birthday');
-    if (birthdayStr) {
-      childData.birthday = Date.parse(birthdayStr);
-    }
-    
-    // 處理照片
-    const photoFile = photoInput.files[0];
-    if (photoFile) {
-      try {
-        const photoDataUrl = await readFileAsDataURL(photoFile);
-        childData.photo = photoDataUrl;
-      } catch (error) {
-        console.error('讀取照片失敗:', error);
-        showErrorMessage('無法讀取照片', '請選擇其他照片或稍後重試。');
-        return;
-      }
-    }
-    
-    // 呼叫提交回調
-    onSubmit(childData);
-    
-    // 關閉模態對話框
-    hideModal();
-  });
-  
-  // 綁定取消按鈕事件
-  modal.querySelector('.cancel-button').addEventListener('click', () => {
-    hideModal();
-  });
-}
-
-/**
- * 顯示添加餵食記錄表單
- * @param {Object} childData - 子女數據
- * @param {Function} onSubmit - 表單提交回調函數
- */
-export function showAddFeedingModal(childData, onSubmit) {
-  const content = `
-    <div class="modal-header">
-      <h2>添加餵食記錄</h2>
-      <div class="modal-subtitle">${childData.name}</div>
-    </div>
-    <form id="add-feeding-form" class="modal-form">
-      <div class="form-group">
-        <label for="feeding-time">餵食時間 <span class="required">*</span></label>
-        <input type="datetime-local" id="feeding-time" name="feedingTime" required>
-      </div>
-      
-      <div class="form-group">
-        <label>餵食方式 <span class="required">*</span></label>
-        <div class="radio-group">
-          <label class="radio-label">
-            <input type="radio" name="method" value="母乳" checked>
-            <span>母乳</span>
-          </label>
-          <label class="radio-label">
-            <input type="radio" name="method" value="奶瓶">
-            <span>奶瓶</span>
-          </label>
-          <label class="radio-label">
-            <input type="radio" name="method" value="副食品">
-            <span>副食品</span>
-          </label>
-        </div>
-      </div>
-      
-      <div id="amount-container" class="form-group">
-        <label for="feeding-amount">餵食量 <span class="required">*</span></label>
-        <div class="input-with-unit">
-          <input type="number" id="feeding-amount" name="amount" min="0" step="5" required>
-          <select id="feeding-unit" name="unit">
-            <option value="ml">毫升 (ml)</option>
-            <option value="分鐘">分鐘</option>
-            <option value="湯匙">湯匙</option>
-            <option value="份">份</option>
-          </select>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <label for="feeding-notes">備註</label>
-        <textarea id="feeding-notes" name="notes" rows="3"></textarea>
-      </div>
-      
-      <div class="form-actions">
-        <button type="button" class="secondary-button cancel-button">取消</button>
-        <button type="submit" class="primary-button">添加記錄</button>
-      </div>
-    </form>
-  `;
-  
-  const { modal } = showModal(content, { className: 'add-feeding-modal' });
-  
-  // 設置預設餵食時間為現在
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  
-  document.getElementById('feeding-time').value = `${year}-${month}-${day}T${hours}:${minutes}`;
-  
-  // 根據餵食方式調整單位
-  const methodRadios = modal.querySelectorAll('input[name="method"]');
-  methodRadios.forEach(radio => {
-    radio.addEventListener('change', () => {
-      const unitSelect = document.getElementById('feeding-unit');
-      
-      // 根據餵食方式設置適當的單位選項
-      switch (radio.value) {
-        case '母乳':
-          unitSelect.innerHTML = `
-            <option value="分鐘">分鐘</option>
-            <option value="ml">毫升 (ml)</option>
-          `;
-          break;
-        case '奶瓶':
-          unitSelect.innerHTML = `
-            <option value="ml">毫升 (ml)</option>
-            <option value="安士">安士 (oz)</option>
-          `;
-          break;
-        case '副食品':
-          unitSelect.innerHTML = `
-            <option value="湯匙">湯匙</option>
-            <option value="份">份</option>
-            <option value="克">克 (g)</option>
-          `;
-          break;
-      }
-    });
-  });
-  
-  // 綁定表單提交事件
-  const form = modal.querySelector('#add-feeding-form');
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    // 獲取表單數據
-    const formData = new FormData(form);
-    
-    // 處理時間戳
-    const feedingTimeStr = formData.get('feedingTime');
-    const timestamp = Date.parse(feedingTimeStr);
-    
-    const feedingData = {
-      timestamp,
-      method: formData.get('method'),
-      amount: formData.get('amount'),
-      unit: formData.get('unit'),
-      notes: formData.get('notes') || ''
-    };
-    
-    // 呼叫提交回調
-    onSubmit(feedingData);
-    
-    // 關閉模態對話框
-    hideModal();
-  });
-  
-  // 綁定取消按鈕事件
-  modal.querySelector('.cancel-button').addEventListener('click', () => {
-    hideModal();
-  });
-}
-
-/**
- * 顯示添加親子互動日記表單
- * @param {Object} childData - 子女數據
- * @param {Function} onSubmit - 表單提交回調函數
- */
-export function showAddInteractionModal(childData, onSubmit) {
-  const content = `
-    <div class="modal-header">
-      <h2>添加親子互動日記</h2>
-      <div class="modal-subtitle">${childData.name}</div>
-    </div>
-    <form id="add-interaction-form" class="modal-form">
-      <div class="form-group">
-        <label for="interaction-date">日期 <span class="required">*</span></label>
-        <input type="date" id="interaction-date" name="interactionDate" required>
-      </div>
-      
-      <div class="form-group">
-        <label for="interaction-title">標題 <span class="required">*</span></label>
-        <input type="text" id="interaction-title" name="title" required 
-               placeholder="例如：公園玩耍、一起閱讀、第一次微笑...">
-      </div>
-      
-      <div class="form-group">
-        <label for="interaction-content">互動內容 <span class="required">*</span></label>
-        <textarea id="interaction-content" name="content" rows="4" required
-                  placeholder="記錄今天與寶寶互動的細節..."></textarea>
-      </div>
-      
-      <div class="form-group">
-        <label for="parent-reflection">父母反思</label>
-        <textarea id="parent-reflection" name="parentReflection" rows="3"
-                  placeholder="這次互動讓您有什麼感受或發現？"></textarea>
-      </div>
-      
-      <div class="form-actions">
-        <button type="button" class="secondary-button cancel-button">取消</button>
-        <button type="submit" class="primary-button">添加日記</button>
-      </div>
-    </form>
-  `;
-  
-  const { modal } = showModal(content, { className: 'add-interaction-modal' });
-  
-  // 設置預設日期為今天
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('interaction-date').value = today;
-  
-  // 綁定表單提交事件
-  const form = modal.querySelector('#add-interaction-form');
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    // 獲取表單數據
-    const formData = new FormData(form);
-    
-    // 處理日期
-    const dateStr = formData.get('interactionDate');
-    const date = Date.parse(dateStr);
-    
-    const interactionData = {
-      date,
-      title: formData.get('title'),
-      content: formData.get('content'),
-      parentReflection: formData.get('parentReflection') || ''
-    };
-    
-    // 呼叫提交回調
-    onSubmit(interactionData);
-    
-    // 關閉模態對話框
-    hideModal();
-  });
-  
-  // 綁定取消按鈕事件
-  modal.querySelector('.cancel-button').addEventListener('click', () => {
-    hideModal();
-  });
-}
-
-/**
- * 顯示添加親子反思表單
- * @param {Object} childData - 子女數據
- * @param {string} prompt - 反思提示
- * @param {Function} onSubmit - 表單提交回調函數
- */
-export function showAddReflectionModal(childData, prompt, onSubmit) {
-  const content = `
-    <div class="modal-header">
-      <h2>親子時刻反思</h2>
-      <div class="modal-subtitle">${childData.name}</div>
-    </div>
-    <form id="add-reflection-form" class="modal-form">
-      <div class="reflection-prompt-card">
-        <div class="prompt-icon">
-          <i class="fas fa-lightbulb"></i>
-        </div>
-        <div class="prompt-content">
-          <p id="reflection-prompt-text">${prompt}</p>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <label for="reflection-content">您的反思 <span class="required">*</span></label>
-        <textarea id="reflection-content" name="parentReflection" rows="5" required
-                  placeholder="分享您的親子時刻與感受..."></textarea>
-      </div>
-      
-      <div class="form-actions">
-        <button type="button" class="secondary-button cancel-button">取消</button>
-        <button type="submit" class="primary-button">保存反思</button>
-      </div>
-    </form>
-  `;
-  
-  const { modal } = showModal(content, { className: 'add-reflection-modal' });
-  
-  // 綁定表單提交事件
-  const form = modal.querySelector('#add-reflection-form');
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    // 獲取表單數據
-    const reflectionData = {
-      parentReflection: form.elements.parentReflection.value,
-      prompt: prompt,
-      title: '親子時刻反思',
-      content: prompt
-    };
-    
-    // 呼叫提交回調
-    onSubmit(reflectionData);
-    
-    // 關閉模態對話框
-    hideModal();
-  });
-  
-  // 綁定取消按鈕事件
-  modal.querySelector('.cancel-button').addEventListener('click', () => {
-    hideModal();
-  });
-}
-
-/**
- * 顯示確認對話框
- * @param {string} title - 標題
- * @param {string} message - 訊息
- * @param {Function} onConfirm - 確認回調函數
- * @param {string} confirmText - 確認按鈕文字
- * @param {string} buttonType - 確認按鈕類型
- */
-export function showConfirmModal(title, message, onConfirm, confirmText = '確認', buttonType = 'primary') {
-  const content = `
-    <div class="modal-header">
-      <h2>${title}</h2>
-    </div>
-    <div class="modal-body">
-      <p>${message}</p>
-    </div>
-    <div class="modal-actions">
-      <button class="secondary-button cancel-button">取消</button>
-      <button class="${buttonType}-button confirm-button">${confirmText}</button>
-    </div>
-  `;
-  
-  const { modal } = showModal(content, { className: 'confirm-modal' });
-  
-  // 綁定確認按鈕事件
-  modal.querySelector('.confirm-button').addEventListener('click', () => {
-    hideModal();
-    if (typeof onConfirm === 'function') {
-      onConfirm();
-    }
-  });
-  
-  // 綁定取消按鈕事件
-  modal.querySelector('.cancel-button').addEventListener('click', () => {
-    hideModal();
-  });
-}
-
-/**
- * 顯示成功訊息吐司通知
- * @param {string} title - 標題
- * @param {string} message - 訊息
- */
-export function showSuccessMessage(title, message) {
-  showToast(title, message, 'success');
-}
-
-/**
- * 顯示錯誤訊息吐司通知
- * @param {string} title - 標題
- * @param {string} message - 訊息
- */
-export function showErrorMessage(title, message) {
-  showToast(title, message, 'error');
-}
-
-/**
- * 顯示資訊訊息吐司通知
- * @param {string} title - 標題
- * @param {string} message - 訊息
- */
-export function showInfoMessage(title, message) {
-  showToast(title, message, 'info');
-}
-
-/**
- * 顯示警告訊息吐司通知
- * @param {string} title - 標題
- * @param {string} message - 訊息
- */
-export function showWarningMessage(title, message) {
-  showToast(title, message, 'warning');
-}
-
-/**
- * 顯示吐司通知
- * @param {string} title - 標題
- * @param {string} message - 訊息
- * @param {string} type - 類型（'success'|'error'|'info'|'warning'）
- * @param {number} duration - 顯示時間（毫秒）
- */
-function showToast(title, message, type = 'info', duration = 3000) {
-  const toastContainer = document.getElementById('toast-container');
-  
-  // 創建吐司元素
-  const toast = document.createElement('div');
-  toast.className = `toast toast-${type}`;
-  
-  // 設置圖標
-  let icon;
-  switch (type) {
-    case 'success':
-      icon = 'fa-check-circle';
-      break;
-    case 'error':
-      icon = 'fa-exclamation-circle';
-      break;
-    case 'warning':
-      icon = 'fa-exclamation-triangle';
-      break;
-    case 'info':
-    default:
-      icon = 'fa-info-circle';
-  }
-  
-  // 設置吐司內容
-  toast.innerHTML = `
-    <div class="toast-icon">
-      <i class="fas ${icon}"></i>
-    </div>
-    <div class="toast-content">
-      <div class="toast-title">${title}</div>
+    // 設置內容
+    toast.innerHTML = `
+      <div class="toast-icon">${icon}</div>
       <div class="toast-message">${message}</div>
-    </div>
-    <button class="toast-close" aria-label="關閉">
-      <i class="fas fa-times"></i>
-    </button>
-  `;
-  
-  // 添加到容器
-  toastContainer.appendChild(toast);
-  
-  // 添加關閉按鈕事件
-  const closeButton = toast.querySelector('.toast-close');
-  closeButton.addEventListener('click', () => {
-    closeToast(toast);
-  });
-  
-  // 設置自動關閉
-  setTimeout(() => {
-    closeToast(toast);
-  }, duration);
-  
-  // 添加顯示類別
-  setTimeout(() => {
-    toast.classList.add('show');
-  }, 10);
-}
-
-/**
- * 關閉吐司通知
- * @param {HTMLElement} toast - 吐司元素
- */
-function closeToast(toast) {
-  // 移除顯示類別
-  toast.classList.remove('show');
-  
-  // 設置過渡後移除元素
-  setTimeout(() => {
-    if (toast.parentNode) {
-      toast.parentNode.removeChild(toast);
-    }
-  }, 300);
-}
-
-// 輔助函數 - 計算年齡文字
-function calculateAgeText(birthday) {
-  if (!birthday) return '未知年齡';
-  
-  const birthDate = new Date(birthday);
-  const now = new Date();
-  
-  // 計算年齡（年、月、日）
-  let years = now.getFullYear() - birthDate.getFullYear();
-  let months = now.getMonth() - birthDate.getMonth();
-  let days = now.getDate() - birthDate.getDate();
-  
-  // 調整月份和天數
-  if (days < 0) {
-    months--;
-    const lastMonthDate = new Date(now.getFullYear(), now.getMonth(), 0);
-    days += lastMonthDate.getDate();
-  }
-  
-  if (months < 0) {
-    years--;
-    months += 12;
-  }
-  
-  // 格式化年齡文字
-  if (years > 0) {
-    return `${years} 歲 ${months} 個月`;
-  } else if (months > 0) {
-    return `${months} 個月 ${days} 天`;
-  } else {
-    return `${days} 天`;
-  }
-}
-
-// 輔助函數 - 格式化日期
-function formatDate(dateObj) {
-  if (!dateObj || !(dateObj instanceof Date)) return '';
-  
-  const year = dateObj.getFullYear();
-  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-  const day = String(dateObj.getDate()).padStart(2, '0');
-  
-  return `${year}-${month}-${day}`;
-}
-
-// 輔助函數 - 格式化時間
-function formatTime(dateObj) {
-  if (!dateObj || !(dateObj instanceof Date)) return '';
-  
-  const hours = String(dateObj.getHours()).padStart(2, '0');
-  const minutes = String(dateObj.getMinutes()).padStart(2, '0');
-  
-  return `${hours}:${minutes}`;
-}
-
-// 輔助函數 - 將文件讀取為 Data URL
-function readFileAsDataURL(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
+      <button class="toast-close"><i class="fas fa-times"></i></button>
+    `;
     
-    reader.onload = (event) => {
-      resolve(event.target.result);
-    };
+    // 添加到容器
+    this.elements.toastContainer.appendChild(toast);
     
-    reader.onerror = (error) => {
-      reject(error);
-    };
+    // 顯示動畫
+    setTimeout(() => {
+      toast.classList.add('active');
+    }, 10);
     
-    reader.readAsDataURL(file);
-  });
+    // 綁定關閉按鈕
+    const closeButton = toast.querySelector('.toast-close');
+    if (closeButton) {
+      closeButton.addEventListener('click', () => {
+        this.closeToast(toast);
+      });
+    }
+    
+    // 設置自動關閉計時器
+    const timer = setTimeout(() => {
+      this.closeToast(toast);
+    }, duration);
+    
+    // 存儲計時器 ID
+    toast.dataset.timer = timer;
+  }
+
+  /**
+   * 關閉提示消息
+   * @param {HTMLElement} toast - 提示元素
+   * @private
+   */
+  closeToast(toast) {
+    // 清除計時器
+    clearTimeout(parseInt(toast.dataset.timer));
+    
+    // 移除活動狀態（觸發淡出動畫）
+    toast.classList.remove('active');
+    
+    // 等待動畫完成後移除元素
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 300); // 與 CSS 過渡時間相同
+  }
+
+  /**
+   * 顯示錯誤消息
+   * @param {string} title - 錯誤標題
+   * @param {string} message - 錯誤詳情
+   */
+  showError(title, message) {
+    // 創建錯誤模態窗口
+    const errorContent = `
+      <div class="error-modal">
+        <div class="error-icon">
+          <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <h2>${title}</h2>
+        <p>${message}</p>
+        <button id="closeErrorButton" class="primary-button">確定</button>
+      </div>
+    `;
+    
+    this.showModal(errorContent, 'error-dialog');
+    
+    // 綁定關閉按鈕
+    const closeButton = document.getElementById('closeErrorButton');
+    if (closeButton) {
+      closeButton.addEventListener('click', () => {
+        this.closeModal();
+      });
+    }
+    
+    // 同時顯示提示消息
+    this.showToast(title, 'error');
+    
+    console.error(`[UI] 錯誤: ${title} - ${message}`);
+  }
+
+  /**
+   * 顯示確認對話框
+   * @param {string} title - 對話框標題
+   * @param {string} message - 對話框消息
+   * @param {Function} onConfirm - 確認回調函數
+   * @param {Function} [onCancel] - 取消回調函數
+   */
+  showConfirm(title, message, onConfirm, onCancel) {
+    // 創建確認對話框
+    const confirmContent = `
+      <div class="confirm-dialog">
+        <h2>${title}</h2>
+        <p>${message}</p>
+        <div class="form-actions">
+          <button id="cancelButton" class="secondary-button">取消</button>
+          <button id="confirmButton" class="primary-button">確認</button>
+        </div>
+      </div>
+    `;
+    
+    this.showModal(confirmContent, 'confirm-dialog');
+    
+    // 綁定確認按鈕
+    const confirmButton = document.getElementById('confirmButton');
+    if (confirmButton) {
+      confirmButton.addEventListener('click', () => {
+        this.closeModal();
+        if (typeof onConfirm === 'function') {
+          onConfirm();
+        }
+      });
+    }
+    
+    // 綁定取消按鈕
+    const cancelButton = document.getElementById('cancelButton');
+    if (cancelButton) {
+      cancelButton.addEventListener('click', () => {
+        this.closeModal();
+        if (typeof onCancel === 'function') {
+          onCancel();
+        }
+      });
+    }
+  }
+
+  /**
+   * 過濾活動列表根據類別
+   * @param {string} category - 類別名稱：'all', 'feeding', 'sleep', 'diaper', 'other'
+   */
+  filterActivitiesByCategory(category) {
+    // 更新分類標籤的活動狀態
+    document.querySelectorAll('.category-tab').forEach(tab => {
+      tab.classList.remove('active');
+      if (tab.dataset.category === category) {
+        tab.classList.add('active');
+      }
+    });
+    
+    // 過濾時間軸項目
+    if (category === 'all') {
+      // 顯示所有項目
+      document.querySelectorAll('.timeline-item').forEach(item => {
+        item.style.display = '';
+      });
+    } else {
+      // 顯示匹配類別的項目，隱藏其他項目
+      document.querySelectorAll('.timeline-item').forEach(item => {
+        if (item.dataset.activityType === category || 
+            (category === 'other' && !['feeding', 'sleep', 'diaper'].includes(item.dataset.activityType))) {
+          item.style.display = '';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+  }
+
+  /**
+   * 變更時間視圖
+   * @param {string} viewType - 視圖類型：'day', 'week', 'month'
+   */
+  changeTimeView(viewType) {
+    // 更新視圖控制按鈕的活動狀態
+    document.querySelectorAll('.view-control').forEach(control => {
+      control.classList.remove('active');
+      if (control.dataset.view === viewType) {
+        control.classList.add('active');
+      }
+    });
+    
+    // 使用自定義事件觸發，讓 App 類處理
+    const event = new CustomEvent('changeTimeView', { 
+      detail: { viewType } 
+    });
+    document.dispatchEvent(event);
+  }
 }
 
-// 分析圖表創建函數 - 這些函數在實際實現中會更加詳細
-function createFeedingAnalysisChart(data, period) {
-  // 這裡是一個示例實現
-  // 實際實現會根據數據結構有所不同
-  return {
-    type: 'bar',
-    data: {
-      labels: ['範例數據'],
-      datasets: [{
-        label: '餵食次數',
-        data: [data.feedings ? data.feedings.length : 0],
-        backgroundColor: 'rgba(255, 159, 64, 0.6)'
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      title: {
-        display: true,
-        text: '餵食分析'
-      }
-    }
-  };
-}
-
-function createSleepAnalysisChart(data, period) {
-  // 實現示例
-  return {
-    type: 'bar',
-    data: {
-      labels: ['範例數據'],
-      datasets: [{
-        label: '睡眠小時',
-        data: [8],
-        backgroundColor: 'rgba(54, 162, 235, 0.6)'
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      title: {
-        display: true,
-        text: '睡眠分析'
-      }
-    }
-  };
-}
-
-function createHealthAnalysisChart(data, period) {
-  // 實現示例
-  return {
-    type: 'line',
-    data: {
-      labels: ['範例數據'],
-      datasets: [{
-        label: '體重 (kg)',
-        data: [5],
-        backgroundColor: 'rgba(75, 192, 192, 0.6)'
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      title: {
-        display: true,
-        text: '健康趨勢'
-      }
-    }
-  };
-}
-
-function createMoodAnalysisChart(data, period) {
-  // 實現示例
-  return {
-    type: 'pie',
-    data: {
-      labels: ['開心', '平靜', '不安'],
-      datasets: [{
-        data: [5, 3, 1],
-        backgroundColor: [
-          'rgba(75, 192, 192, 0.6)',
-          'rgba(54, 162, 235, 0.6)',
-          'rgba(255, 99, 132, 0.6)'
-        ]
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      title: {
-        display: true,
-        text: '情緒分析'
-      }
-    }
-  };
-}
-
-function createDevelopmentAnalysisChart(data, period) {
-  // 實現示例
-  return {
-    type: 'radar',
-    data: {
-      labels: ['運動', '語言', '社交', '認知', '情緒'],
-      datasets: [{
-        label: '發展評估',
-        data: [5, 3, 4, 4, 3],
-        backgroundColor: 'rgba(153, 102, 255, 0.2)',
-        borderColor: 'rgba(153, 102, 255, 1)',
-        pointBackgroundColor: 'rgba(153, 102, 255, 1)'
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      title: {
-        display: true,
-        text: '發展評估'
-      }
-    }
-  };
-}
+// 導出 UI 類
+export default UI;

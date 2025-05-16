@@ -1,246 +1,297 @@
-/**
- * config.js - 應用程式配置文件
- * 
- * 此文件定義應用程式的各種常量設定，包括資料庫名稱、
- * 版本、預設值和配置選項等。
- * 
- * @author BabyGrow Team
- * @version 1.0.0
- */
-
 'use strict';
 
 /**
- * IndexedDB 資料庫名稱
- * @type {string}
+ * @fileoverview 應用程式配置文件
+ * @author BabyLog 開發團隊
+ * @version 1.0.0
  */
-export const DB_NAME = 'babyGrowDB';
 
 /**
- * IndexedDB 資料庫版本
- * 注意：每當資料庫結構有變更時，需要增加此版本號
- * @type {number}
+ * 應用程式配置常量
  */
-export const DB_VERSION = 1;
-
-/**
- * Object Store 名稱列表
- * @type {Array<string>}
- */
-export const STORE_NAMES = [
-  'children',      // 兒童檔案
-  'feeding',       // 餵食記錄
-  'sleep',         // 睡眠記錄
-  'diaper',        // 尿布更換記錄
-  'health',        // 健康記錄
-  'milestone',     // 發展里程碑
-  'moodBehavior',  // 情緒與行為記錄
-  'interactionLog',// 親子互動日記
-  'settings'       // 應用程式設定
-];
-
-/**
- * 各年齡段發展里程碑參考標準
- * @type {Object}
- */
-export const MILESTONE_REFERENCES = {
-  '2months': [
-    { type: 'social', label: '開始微笑回應他人' },
-    { type: 'motor', label: '抬頭可以短暫維持' },
-    { type: 'communication', label: '發出咕咕聲' }
+export const APP_CONFIG = {
+  /**
+   * 應用程式名稱
+   */
+  APP_NAME: '寶貝日誌',
+  
+  /**
+   * IndexedDB 數據庫名稱
+   */
+  DB_NAME: 'babylogDB',
+  
+  /**
+   * IndexedDB 數據庫版本
+   */
+  DB_VERSION: 1,
+  
+  /**
+   * 本地存儲鍵名
+   */
+  STORAGE_KEYS: {
+    /**
+     * 首次使用標記
+     */
+    FIRST_USE: 'babylog_first_use',
+    
+    /**
+     * 主題設置
+     */
+    THEME: 'babylog_theme',
+    
+    /**
+     * 選定的孩子 ID
+     */
+    SELECTED_CHILD: 'babylog_selected_child'
+  },
+  
+  /**
+   * 反思提示列表
+   */
+  REFLECTION_PROMPTS: [
+    '今天您和寶寶之間有什麼特別的互動讓您感到開心？',
+    '您注意到寶寶今天學會了什麼新技能或表現出什麼新的行為？',
+    '當寶寶哭鬧時，您發現哪些安撫方法特別有效？',
+    '在照顧寶寶的過程中，今天您感到最具挑戰性的是什麼？',
+    '您今天有沒有為自己留出一些時間？如果有，您做了什麼？',
+    '今天有沒有一個與寶寶相處的時刻，讓您感到特別感恩？',
+    '您發現寶寶對什麼特別感興趣或感到好奇？',
+    '您今天如何鼓勵寶寶的探索和學習？',
+    '您注意到寶寶的睡眠模式有什麼變化嗎？',
+    '寶寶的飲食喜好或習慣有什麼新的發現？',
+    '您今天學到了什麼關於育兒的新知識或技巧？',
+    '您如何在忙碌的育兒生活中照顧自己的情緒健康？',
+    '您今天與伴侶或其他家人如何分擔育兒責任？',
+    '您想對未來的自己分享什麼關於今天的育兒經驗？',
+    '如果可以重來，您今天會做什麼不同的選擇？',
+    '您如何平衡工作（或其他責任）和照顧寶寶？',
+    '您和寶寶今天有哪些愉快的遊戲或活動？',
+    '您如何描述今天寶寶的整體情緒狀態？',
+    '您發現哪些環境或情況會讓寶寶感到特別開心或安靜？',
+    '您對寶寶的成長發展有什麼新的觀察或思考？'
   ],
-  '4months': [
-    { type: 'social', label: '自發性微笑' },
-    { type: 'motor', label: '可以雙手抓住玩具' },
-    { type: 'sensory', label: '開始認出熟悉的臉孔和物體' }
+  
+  /**
+   * 里程碑類別
+   */
+  MILESTONE_CATEGORIES: [
+    {
+      id: 'motor',
+      name: '運動技能',
+      milestones: [
+        { id: 'head_control', name: '抬頭', typical_age: '1-4月' },
+        { id: 'roll_over', name: '翻身', typical_age: '4-6月' },
+        { id: 'sit_without_support', name: '獨坐', typical_age: '6-8月' },
+        { id: 'crawl', name: '爬行', typical_age: '7-10月' },
+        { id: 'stand_with_assistance', name: '扶站', typical_age: '8-10月' },
+        { id: 'stand_alone', name: '獨站', typical_age: '9-12月' },
+        { id: 'walk_with_assistance', name: '扶走', typical_age: '9-12月' },
+        { id: 'walk_alone', name: '獨走', typical_age: '12-16月' },
+        { id: 'climb_stairs', name: '爬樓梯', typical_age: '18-24月' },
+        { id: 'run', name: '跑步', typical_age: '18-24月' },
+        { id: 'kick_ball', name: '踢球', typical_age: '24-30月' },
+        { id: 'jump', name: '跳躍', typical_age: '24-36月' }
+      ]
+    },
+    {
+      id: 'language',
+      name: '語言能力',
+      milestones: [
+        { id: 'coo', name: '咕咕聲', typical_age: '1-3月' },
+        { id: 'laugh', name: '笑聲', typical_age: '3-4月' },
+        { id: 'babble', name: '牙牙學語', typical_age: '4-6月' },
+        { id: 'respond_to_name', name: '對名字有反應', typical_age: '5-9月' },
+        { id: 'understand_no', name: '理解"不"', typical_age: '6-12月' },
+        { id: 'first_word', name: '第一個詞', typical_age: '9-14月' },
+        { id: 'follow_simple_directions', name: '遵循簡單指示', typical_age: '12-18月' },
+        { id: 'point_to_objects', name: '指物', typical_age: '12-18月' },
+        { id: 'use_2_word_phrases', name: '兩詞句', typical_age: '18-24月' },
+        { id: 'name_familiar_objects', name: '命名熟悉物品', typical_age: '18-24月' },
+        { id: 'use_pronouns', name: '使用代詞', typical_age: '24-36月' },
+        { id: 'three_word_sentences', name: '三詞句', typical_age: '24-36月' }
+      ]
+    },
+    {
+      id: 'social',
+      name: '社交情感',
+      milestones: [
+        { id: 'social_smile', name: '社交性微笑', typical_age: '1-3月' },
+        { id: 'recognize_parents', name: '認出父母', typical_age: '2-4月' },
+        { id: 'stranger_anxiety', name: '陌生人焦慮', typical_age: '6-10月' },
+        { id: 'separation_anxiety', name: '分離焦慮', typical_age: '8-14月' },
+        { id: 'imitate_actions', name: '模仿行為', typical_age: '8-12月' },
+        { id: 'play_peek_a_boo', name: '玩躲貓貓', typical_age: '6-10月' },
+        { id: 'wave_bye', name: '揮手再見', typical_age: '8-12月' },
+        { id: 'show_affection', name: '表達情感', typical_age: '9-15月' },
+        { id: 'play_alongside_others', name: '平行遊戲', typical_age: '18-24月' },
+        { id: 'show_empathy', name: '表現同理心', typical_age: '24-36月' },
+        { id: 'engage_in_pretend_play', name: '假裝遊戲', typical_age: '24-36月' },
+        { id: 'take_turns', name: '輪流玩耍', typical_age: '30-42月' }
+      ]
+    },
+    {
+      id: 'cognitive',
+      name: '認知發展',
+      milestones: [
+        { id: 'follow_moving_objects', name: '追視移動物體', typical_age: '1-3月' },
+        { id: 'recognize_familiar_faces', name: '認出熟悉的臉', typical_age: '2-4月' },
+        { id: 'reach_for_objects', name: '伸手拿物品', typical_age: '3-5月' },
+        { id: 'find_partially_hidden_objects', name: '找到部分隱藏的物體', typical_age: '5-8月' },
+        { id: 'explore_objects', name: '探索物體', typical_age: '6-10月' },
+        { id: 'object_permanence', name: '物體恆存', typical_age: '8-12月' },
+        { id: 'cause_and_effect', name: '因果關係', typical_age: '8-12月' },
+        { id: 'functional_play', name: '功能性遊戲', typical_age: '12-18月' },
+        { id: 'sort_shapes', name: '分類形狀', typical_age: '18-24月' },
+        { id: 'complete_simple_puzzles', name: '完成簡單拼圖', typical_age: '24-36月' },
+        { id: 'understand_counting', name: '理解計數', typical_age: '24-36月' },
+        { id: 'recognize_colors', name: '辨認顏色', typical_age: '30-42月' }
+      ]
+    },
+    {
+      id: 'self_help',
+      name: '自理能力',
+      milestones: [
+        { id: 'hold_bottle', name: '握住奶瓶', typical_age: '3-6月' },
+        { id: 'eat_finger_food', name: '吃手指食物', typical_age: '8-12月' },
+        { id: 'drink_from_cup', name: '用杯子喝水', typical_age: '12-18月' },
+        { id: 'use_spoon', name: '使用湯匙', typical_age: '15-24月' },
+        { id: 'take_off_simple_clothes', name: '脫簡單衣物', typical_age: '18-24月' },
+        { id: 'show_interest_in_toilet', name: '對廁所有興趣', typical_age: '18-30月' },
+        { id: 'wash_hands', name: '洗手', typical_age: '24-30月' },
+        { id: 'put_on_simple_clothes', name: '穿簡單衣物', typical_age: '24-36月' },
+        { id: 'brush_teeth_with_help', name: '在幫助下刷牙', typical_age: '24-36月' },
+        { id: 'daytime_potty_trained', name: '白天如廁訓練完成', typical_age: '24-48月' }
+      ]
+    }
   ],
-  '6months': [
-    { type: 'motor', label: '翻身（從仰臥到俯臥）' },
-    { type: 'motor', label: '開始坐立（有支撐）' },
-    { type: 'food', label: '開始嘗試副食品' },
-    { type: 'communication', label: '發出更多音節' }
+  
+  /**
+   * 健康記錄類別
+   */
+  HEALTH_CATEGORIES: [
+    {
+      id: 'vaccination',
+      name: '疫苗接種',
+      fields: [
+        { id: 'vaccine_name', name: '疫苗名稱', type: 'select', required: true, options: [] },
+        { id: 'dose_number', name: '劑次', type: 'number', required: true },
+        { id: 'location', name: '接種地點', type: 'text', required: false },
+        { id: 'provider', name: '醫護人員', type: 'text', required: false },
+        { id: 'reaction', name: '反應', type: 'textarea', required: false }
+      ]
+    },
+    {
+      id: 'medication',
+      name: '用藥記錄',
+      fields: [
+        { id: 'medication_name', name: '藥物名稱', type: 'text', required: true },
+        { id: 'dosage', name: '劑量', type: 'text', required: true },
+        { id: 'frequency', name: '頻率', type: 'text', required: false },
+        { id: 'reason', name: '原因', type: 'text', required: false },
+        { id: 'prescriber', name: '處方醫生', type: 'text', required: false },
+        { id: 'notes', name: '備註', type: 'textarea', required: false }
+      ]
+    },
+    {
+      id: 'illness',
+      name: '疾病記錄',
+      fields: [
+        { id: 'symptom', name: '症狀', type: 'text', required: true },
+        { id: 'temperature', name: '體溫', type: 'text', required: false },
+        { id: 'started', name: '開始時間', type: 'datetime-local', required: false },
+        { id: 'ended', name: '結束時間', type: 'datetime-local', required: false },
+        { id: 'treatment', name: '治療', type: 'textarea', required: false },
+        { id: 'notes', name: '備註', type: 'textarea', required: false }
+      ]
+    },
+    {
+      id: 'checkup',
+      name: '體檢記錄',
+      fields: [
+        { id: 'provider', name: '醫生/醫院', type: 'text', required: true },
+        { id: 'weight', name: '體重', type: 'text', required: false },
+        { id: 'height', name: '身高', type: 'text', required: false },
+        { id: 'head_circumference', name: '頭圍', type: 'text', required: false },
+        { id: 'notes', name: '備註', type: 'textarea', required: false }
+      ]
+    },
+    {
+      id: 'allergy',
+      name: '過敏記錄',
+      fields: [
+        { id: 'allergen', name: '過敏原', type: 'text', required: true },
+        { id: 'reaction', name: '反應', type: 'text', required: true },
+        { id: 'severity', name: '嚴重程度', type: 'select', required: false, options: [
+          { value: 'mild', label: '輕微' },
+          { value: 'moderate', label: '中等' },
+          { value: 'severe', label: '嚴重' }
+        ]},
+        { id: 'notes', name: '備註', type: 'textarea', required: false }
+      ]
+    }
   ],
-  '9months': [
-    { type: 'motor', label: '獨自坐立' },
-    { type: 'motor', label: '爬行' },
-    { type: 'communication', label: '理解簡單詞彙如「不要」、「掰掰」' },
-    { type: 'social', label: '玩躲貓貓等互動遊戲' }
-  ],
-  '12months': [
-    { type: 'motor', label: '扶物站立' },
-    { type: 'motor', label: '可能邁出第一步' },
-    { type: 'communication', label: '說出第一個詞彙（如「爸爸」、「媽媽」）' },
-    { type: 'cognitive', label: '理解簡單指令' }
-  ],
-  '18months': [
-    { type: 'motor', label: '獨立行走' },
-    { type: 'motor', label: '可能開始爬樓梯' },
-    { type: 'communication', label: '認識身體部位' },
-    { type: 'cognitive', label: '拿筆塗鴉' }
-  ],
-  '24months': [
-    { type: 'motor', label: '跑步' },
-    { type: 'motor', label: '踢球' },
-    { type: 'communication', label: '使用兩個詞組成簡單句子' },
-    { type: 'cognitive', label: '開始分類物品' },
-    { type: 'social', label: '模仿大人的行為' }
-  ],
-  '36months': [
-    { type: 'motor', label: '踮腳走路' },
-    { type: 'motor', label: '騎三輪車' },
-    { type: 'communication', label: '說出完整句子' },
-    { type: 'cognitive', label: '數到 10' },
-    { type: 'social', label: '表達情感' }
+  
+  /**
+   * 疫苗類型列表
+   */
+  VACCINES: [
+    { id: 'bcg', name: 'BCG (卡介苗)' },
+    { id: 'hepb', name: 'B型肝炎疫苗' },
+    { id: 'dtap', name: 'DTaP (白喉、破傷風、百日咳)' },
+    { id: 'ipv', name: 'IPV (小兒麻痺)' },
+    { id: 'hib', name: 'Hib (b型嗜血桿菌)' },
+    { id: 'pcv', name: 'PCV (肺炎鏈球菌)' },
+    { id: 'rv', name: 'RV (輪狀病毒)' },
+    { id: 'mmr', name: 'MMR (麻疹、腮腺炎、德國麻疹)' },
+    { id: 'var', name: 'VAR (水痘)' },
+    { id: 'hepa', name: 'A型肝炎疫苗' },
+    { id: 'flu', name: '流感疫苗' },
+    { id: 'jev', name: '日本腦炎疫苗' },
+    { id: 'other', name: '其他' }
   ]
 };
 
-/**
- * 情緒類型選項
- * @type {Array<Object>}
- */
-export const MOOD_OPTIONS = [
-  { value: 'happy', label: '開心', icon: 'fa-smile-beam' },
-  { value: 'calm', label: '平靜', icon: 'fa-smile' },
-  { value: 'tired', label: '疲倦', icon: 'fa-tired' },
-  { value: 'fussy', label: '煩躁', icon: 'fa-frown' },
-  { value: 'angry', label: '生氣', icon: 'fa-angry' },
-  { value: 'scared', label: '害怕', icon: 'fa-grimace' },
-  { value: 'uncomfortable', label: '不適', icon: 'fa-dizzy' },
-  { value: 'crying', label: '哭泣', icon: 'fa-sad-tear' }
-];
+// 將疫苗列表添加到健康記錄類別中
+APP_CONFIG.HEALTH_CATEGORIES.find(category => category.id === 'vaccination')
+  .fields.find(field => field.id === 'vaccine_name')
+  .options = APP_CONFIG.VACCINES.map(vaccine => ({ value: vaccine.id, label: vaccine.name }));
 
 /**
- * 餵食方式選項
- * @type {Array<Object>}
+ * 獲取指定 ID 的里程碑類別
+ * @param {string} categoryId - 類別 ID
+ * @returns {Object|null} 里程碑類別對象或 null
  */
-export const FEEDING_METHOD_OPTIONS = [
-  { value: 'breast', label: '母乳' },
-  { value: 'bottle', label: '奶瓶' },
-  { value: 'formula', label: '配方奶' },
-  { value: 'solidFood', label: '副食品' }
-];
+export function getMilestoneCategory(categoryId) {
+  return APP_CONFIG.MILESTONE_CATEGORIES.find(category => category.id === categoryId) || null;
+}
 
 /**
- * 尿布類型選項
- * @type {Array<Object>}
+ * 獲取指定類別中指定 ID 的里程碑
+ * @param {string} categoryId - 類別 ID
+ * @param {string} milestoneId - 里程碑 ID
+ * @returns {Object|null} 里程碑對象或 null
  */
-export const DIAPER_TYPE_OPTIONS = [
-  { value: 'wet', label: '尿尿', icon: 'fa-tint' },
-  { value: 'dirty', label: '便便', icon: 'fa-poo' },
-  { value: 'mixed', label: '尿尿和便便', icon: 'fa-wind' },
-  { value: 'dry', label: '乾爽（更換時間）', icon: 'fa-check' }
-];
+export function getMilestone(categoryId, milestoneId) {
+  const category = getMilestoneCategory(categoryId);
+  if (!category) return null;
+  
+  return category.milestones.find(milestone => milestone.id === milestoneId) || null;
+}
 
 /**
- * 尿布狀況選項
- * @type {Array<Object>}
+ * 獲取指定 ID 的健康記錄類別
+ * @param {string} categoryId - 類別 ID
+ * @returns {Object|null} 健康記錄類別對象或 null
  */
-export const DIAPER_CONDITION_OPTIONS = [
-  { value: 'normal', label: '正常' },
-  { value: 'loose', label: '稀便' },
-  { value: 'hard', label: '硬便' },
-  { value: 'mucus', label: '黏液' },
-  { value: 'blood', label: '血絲' },
-  { value: 'unusual', label: '異常顏色' }
-];
+export function getHealthCategory(categoryId) {
+  return APP_CONFIG.HEALTH_CATEGORIES.find(category => category.id === categoryId) || null;
+}
 
 /**
- * 健康記錄類型選項
- * @type {Array<Object>}
+ * 獲取指定 ID 的疫苗
+ * @param {string} vaccineId - 疫苗 ID
+ * @returns {Object|null} 疫苗對象或 null
  */
-export const HEALTH_RECORD_TYPES = [
-  { value: 'weight', label: '體重', unit: 'kg', icon: 'fa-weight' },
-  { value: 'height', label: '身高', unit: 'cm', icon: 'fa-ruler-vertical' },
-  { value: 'temperature', label: '體溫', unit: '°C', icon: 'fa-thermometer-half' },
-  { value: 'vaccine', label: '疫苗', icon: 'fa-syringe' },
-  { value: 'medication', label: '用藥', icon: 'fa-pills' },
-  { value: 'symptom', label: '症狀', icon: 'fa-stethoscope' },
-  { value: 'doctor', label: '就醫紀錄', icon: 'fa-user-md' }
-];
-
-/**
- * 睡眠類型選項
- * @type {Array<Object>}
- */
-export const SLEEP_TYPE_OPTIONS = [
-  { value: 'night', label: '夜間睡眠' },
-  { value: 'nap', label: '午睡' },
-  { value: 'shortNap', label: '小睡' }
-];
-
-/**
- * 發展里程碑類型
- * @type {Array<Object>}
- */
-export const MILESTONE_TYPES = [
-  { value: 'motor', label: '運動能力', icon: 'fa-running' },
-  { value: 'communication', label: '語言溝通', icon: 'fa-comments' },
-  { value: 'cognitive', label: '認知發展', icon: 'fa-brain' },
-  { value: 'social', label: '社交情緒', icon: 'fa-users' },
-  { value: 'food', label: '飲食', icon: 'fa-utensils' },
-  { value: 'other', label: '其他', icon: 'fa-star' }
-];
-
-/**
- * 親子反思提示問題
- * @type {Array<string>}
- */
-export const REFLECTION_PROMPTS = [
-  '今天與寶寶相處時，什麼時刻讓您感到最幸福？',
-  '這週您注意到寶寶有什麼新的變化或能力？',
-  '有什麼寶寶的小習慣或表情讓您覺得特別可愛？',
-  '在照顧寶寶的過程中，您今天面臨了什麼挑戰？您是如何應對的？',
-  '您覺得自己今天做得特別好的一件事是什麼？',
-  '今天有沒有讓您感到困惑或擔憂的事情？',
-  '如果可以重來，您今天會做出什麼不同的選擇？',
-  '您對寶寶的未來有什麼期望或夢想？',
-  '作為父母，您感覺自己有什麼成長或改變？',
-  '今天有沒有瞬間讓您反思自己的教養方式？',
-  '您從自己的父母那裡學到什麼育兒經驗，而您選擇繼承或改變的是什麼？',
-  '您希望寶寶從您身上學到什麼最重要的品質或價值觀？',
-  '今天您是如何表達對寶寶的愛的？',
-  '您認為寶寶現在最需要您提供什麼？',
-  '今天有什麼令您感到驕傲的親子互動時刻？',
-  '您覺得自己需要什麼支持或資源來成為更好的父母？',
-  '觀察寶寶的遊戲方式，您發現了什麼關於他/她性格的線索？',
-  '您和伴侶在育兒理念上有什麼相同或不同之處？這如何影響您的親子關係？',
-  '今天寶寶教會了您什麼？',
-  '如果用一個詞來描述今天的親子時光，那會是什麼？為什麼？'
-];
-
-/**
- * 應用程式版本
- * @type {string}
- */
-export const APP_VERSION = '1.0.0';
-
-/**
- * 預設設定
- * @type {Object}
- */
-export const DEFAULT_SETTINGS = {
-  darkMode: false,
-  notificationsEnabled: true,
-  dataExportReminder: true,
-  reminderFrequency: 'weekly',
-  language: 'zh-TW'
-};
-
-/**
- * Service Worker 設定
- * @type {Object}
- */
-export const SERVICE_WORKER_CONFIG = {
-  enabled: true,
-  cacheName: 'baby-grow-cache-v1',
-  assetsToCache: [
-    '/',
-    '/index.html',
-    '/css/style.css',
-    '/js/app.js',
-    '/js/db.js',
-    '/js/ui.js',
-    '/js/config.js',
-    '/assets/icons/baby-icon.png'
-  ]
-};
+export function getVaccine(vaccineId) {
+  return APP_CONFIG.VACCINES.find(vaccine => vaccine.id === vaccineId) || null;
+}

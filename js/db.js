@@ -1,678 +1,561 @@
-/**
- * db.js - IndexedDB 資料庫操作模組
- * 
- * 此模組封裝所有與 IndexedDB 相關的操作，包括資料庫初始化、
- * 各種 Object Store 的 CRUD 操作，以及事務管理。
- * 
- * @author BabyGrow Team
- * @version 1.0.0
- */
-
 'use strict';
 
 /**
- * BabyDB 類 - 負責所有 IndexedDB 資料庫操作
+ * @fileoverview IndexedDB 操作模組 - 負責所有數據庫相關操作
+ * @author BabyLog 開發團隊
+ * @version 1.0.0
  */
-class BabyDB {
+
+/**
+ * IndexedDB 數據庫管理類
+ * 封裝所有與 IndexedDB 相關的操作
+ */
+class BabyLogDB {
   /**
-   * 建構子
-   * @param {string} dbName - 資料庫名稱
-   * @param {number} dbVersion - 資料庫版本
+   * 構造函數
+   * @param {string} dbName - 數據庫名稱
+   * @param {number} dbVersion - 數據庫版本
    */
-  constructor(dbName, dbVersion) {
+  constructor(dbName = 'babylogDB', dbVersion = 1) {
     this.dbName = dbName;
     this.dbVersion = dbVersion;
     this.db = null;
+    
+    // 數據庫結構定義
+    this.objectStores = {
+      children: { 
+        keyPath: 'id', 
+        autoIncrement: true,
+        indexes: [
+          { name: 'name', keyPath: 'name', options: { unique: false } },
+          { name: 'birthDate', keyPath: 'birthDate', options: { unique: false } }
+        ]
+      },
+      feeding: { 
+        keyPath: 'id', 
+        autoIncrement: true,
+        indexes: [
+          { name: 'childId', keyPath: 'childId', options: { unique: false } },
+          { name: 'timestamp', keyPath: 'timestamp', options: { unique: false } },
+          { name: 'childIdAndTimestamp', keyPath: ['childId', 'timestamp'], options: { unique: false } }
+        ]
+      },
+      sleep: { 
+        keyPath: 'id', 
+        autoIncrement: true,
+        indexes: [
+          { name: 'childId', keyPath: 'childId', options: { unique: false } },
+          { name: 'startTime', keyPath: 'startTime', options: { unique: false } },
+          { name: 'endTime', keyPath: 'endTime', options: { unique: false } },
+          { name: 'childIdAndStartTime', keyPath: ['childId', 'startTime'], options: { unique: false } }
+        ]
+      },
+      diaper: { 
+        keyPath: 'id', 
+        autoIncrement: true,
+        indexes: [
+          { name: 'childId', keyPath: 'childId', options: { unique: false } },
+          { name: 'timestamp', keyPath: 'timestamp', options: { unique: false } },
+          { name: 'childIdAndTimestamp', keyPath: ['childId', 'timestamp'], options: { unique: false } }
+        ]
+      },
+      health: { 
+        keyPath: 'id', 
+        autoIncrement: true,
+        indexes: [
+          { name: 'childId', keyPath: 'childId', options: { unique: false } },
+          { name: 'date', keyPath: 'date', options: { unique: false } },
+          { name: 'type', keyPath: 'type', options: { unique: false } },
+          { name: 'childIdAndDate', keyPath: ['childId', 'date'], options: { unique: false } }
+        ]
+      },
+      moodBehavior: { 
+        keyPath: 'id', 
+        autoIncrement: true,
+        indexes: [
+          { name: 'childId', keyPath: 'childId', options: { unique: false } },
+          { name: 'timestamp', keyPath: 'timestamp', options: { unique: false } },
+          { name: 'childIdAndTimestamp', keyPath: ['childId', 'timestamp'], options: { unique: false } }
+        ]
+      },
+      milestones: { 
+        keyPath: 'id', 
+        autoIncrement: true,
+        indexes: [
+          { name: 'childId', keyPath: 'childId', options: { unique: false } },
+          { name: 'date', keyPath: 'date', options: { unique: false } },
+          { name: 'category', keyPath: 'category', options: { unique: false } },
+          { name: 'childIdAndCategory', keyPath: ['childId', 'category'], options: { unique: false } }
+        ]
+      },
+      interactionLog: { 
+        keyPath: 'id', 
+        autoIncrement: true,
+        indexes: [
+          { name: 'childId', keyPath: 'childId', options: { unique: false } },
+          { name: 'date', keyPath: 'date', options: { unique: false } },
+          { name: 'childIdAndDate', keyPath: ['childId', 'date'], options: { unique: false } }
+        ]
+      },
+      parentReflection: { 
+        keyPath: 'id', 
+        autoIncrement: true,
+        indexes: [
+          { name: 'date', keyPath: 'date', options: { unique: false } }
+        ]
+      }
+    };
   }
 
   /**
-   * 初始化資料庫連接並建立所需的 Object Stores
-   * @returns {Promise<IDBDatabase>} 資料庫連接實例
+   * 初始化數據庫連接
+   * @returns {Promise<IDBDatabase>} 數據庫連接對象
    */
   async initDatabase() {
     try {
       return new Promise((resolve, reject) => {
+        // 檢查瀏覽器是否支持 IndexedDB
         if (!window.indexedDB) {
-          reject(new Error('您的瀏覽器不支援 IndexedDB，請更新瀏覽器或使用其他現代瀏覽器。'));
+          reject(new Error('您的瀏覽器不支持 IndexedDB，無法使用本應用。'));
           return;
         }
 
-        const request = indexedDB.open(this.dbName, this.dbVersion);
+        // 打開或創建數據庫
+        const request = window.indexedDB.open(this.dbName, this.dbVersion);
 
-        // 處理資料庫升級或初始化
+        // 處理數據庫升級事件（首次創建或版本更新時觸發）
         request.onupgradeneeded = (event) => {
           const db = event.target.result;
-          this._createObjectStores(db);
+          
+          // 創建所有 Object Stores
+          for (const [storeName, storeConfig] of Object.entries(this.objectStores)) {
+            // 檢查 Object Store 是否已存在
+            if (!db.objectStoreNames.contains(storeName)) {
+              // 創建 Object Store
+              const objectStore = db.createObjectStore(storeName, { 
+                keyPath: storeConfig.keyPath, 
+                autoIncrement: storeConfig.autoIncrement 
+              });
+              
+              // 為每個 Object Store 創建索引
+              if (storeConfig.indexes) {
+                storeConfig.indexes.forEach(indexConfig => {
+                  objectStore.createIndex(indexConfig.name, indexConfig.keyPath, indexConfig.options);
+                });
+              }
+              
+              console.log(`[BabyLogDB] Object Store "${storeName}" 已創建`);
+            }
+          }
         };
 
-        // 處理資料庫打開成功
+        // 處理成功事件
         request.onsuccess = (event) => {
           this.db = event.target.result;
-          console.log(`資料庫 "${this.dbName}" (v${this.dbVersion}) 連接成功`);
+          console.log(`[BabyLogDB] 數據庫連接成功: ${this.dbName}`);
           resolve(this.db);
         };
 
-        // 處理資料庫打開錯誤
+        // 處理錯誤事件
         request.onerror = (event) => {
-          console.error('資料庫連接錯誤:', event.target.error);
-          reject(new Error('無法連接資料庫，請檢查您的瀏覽器設定是否允許 IndexedDB。'));
+          console.error('[BabyLogDB] 數據庫連接錯誤:', event.target.error);
+          reject(new Error('數據庫連接失敗，請確保您的瀏覽器設置允許網站存儲數據。'));
         };
       });
     } catch (error) {
-      console.error('初始化資料庫失敗:', error);
-      throw error;
+      console.error('[BabyLogDB] 初始化數據庫時出錯:', error);
+      throw new Error('初始化數據庫失敗: ' + error.message);
     }
   }
 
   /**
-   * 創建資料庫所需的 Object Stores 和索引
-   * @param {IDBDatabase} db - 資料庫連接實例
-   * @private
-   */
-  _createObjectStores(db) {
-    // 1. 兒童資訊 Object Store
-    if (!db.objectStoreNames.contains('children')) {
-      const childrenStore = db.createObjectStore('children', { keyPath: 'id', autoIncrement: true });
-      childrenStore.createIndex('nameIndex', 'name', { unique: false });
-      childrenStore.createIndex('birthdayIndex', 'birthday', { unique: false });
-      console.log('已創建 "children" Object Store');
-    }
-
-    // 2. 餵食記錄 Object Store
-    if (!db.objectStoreNames.contains('feeding')) {
-      const feedingStore = db.createObjectStore('feeding', { keyPath: 'id', autoIncrement: true });
-      feedingStore.createIndex('childIdIndex', 'childId', { unique: false });
-      feedingStore.createIndex('timestampIndex', 'timestamp', { unique: false });
-      feedingStore.createIndex('childTimestampIndex', ['childId', 'timestamp'], { unique: false });
-      console.log('已創建 "feeding" Object Store');
-    }
-
-    // 3. 睡眠記錄 Object Store
-    if (!db.objectStoreNames.contains('sleep')) {
-      const sleepStore = db.createObjectStore('sleep', { keyPath: 'id', autoIncrement: true });
-      sleepStore.createIndex('childIdIndex', 'childId', { unique: false });
-      sleepStore.createIndex('startTimeIndex', 'startTime', { unique: false });
-      sleepStore.createIndex('childStartTimeIndex', ['childId', 'startTime'], { unique: false });
-      console.log('已創建 "sleep" Object Store');
-    }
-
-    // 4. 尿布更換記錄 Object Store
-    if (!db.objectStoreNames.contains('diaper')) {
-      const diaperStore = db.createObjectStore('diaper', { keyPath: 'id', autoIncrement: true });
-      diaperStore.createIndex('childIdIndex', 'childId', { unique: false });
-      diaperStore.createIndex('timestampIndex', 'timestamp', { unique: false });
-      diaperStore.createIndex('childTimestampIndex', ['childId', 'timestamp'], { unique: false });
-      console.log('已創建 "diaper" Object Store');
-    }
-
-    // 5. 健康記錄 Object Store
-    if (!db.objectStoreNames.contains('health')) {
-      const healthStore = db.createObjectStore('health', { keyPath: 'id', autoIncrement: true });
-      healthStore.createIndex('childIdIndex', 'childId', { unique: false });
-      healthStore.createIndex('dateIndex', 'date', { unique: false });
-      healthStore.createIndex('typeIndex', 'type', { unique: false });
-      healthStore.createIndex('childDateIndex', ['childId', 'date'], { unique: false });
-      healthStore.createIndex('childTypeIndex', ['childId', 'type'], { unique: false });
-      console.log('已創建 "health" Object Store');
-    }
-
-    // 6. 發展里程碑記錄 Object Store
-    if (!db.objectStoreNames.contains('milestone')) {
-      const milestoneStore = db.createObjectStore('milestone', { keyPath: 'id', autoIncrement: true });
-      milestoneStore.createIndex('childIdIndex', 'childId', { unique: false });
-      milestoneStore.createIndex('dateIndex', 'date', { unique: false });
-      milestoneStore.createIndex('typeIndex', 'type', { unique: false });
-      milestoneStore.createIndex('childTypeIndex', ['childId', 'type'], { unique: false });
-      console.log('已創建 "milestone" Object Store');
-    }
-
-    // 7. 情緒與行為記錄 Object Store
-    if (!db.objectStoreNames.contains('moodBehavior')) {
-      const moodStore = db.createObjectStore('moodBehavior', { keyPath: 'id', autoIncrement: true });
-      moodStore.createIndex('childIdIndex', 'childId', { unique: false });
-      moodStore.createIndex('timestampIndex', 'timestamp', { unique: false });
-      moodStore.createIndex('moodIndex', 'mood', { unique: false });
-      moodStore.createIndex('childTimestampIndex', ['childId', 'timestamp'], { unique: false });
-      console.log('已創建 "moodBehavior" Object Store');
-    }
-
-    // 8. 親子互動日記 Object Store
-    if (!db.objectStoreNames.contains('interactionLog')) {
-      const interactionStore = db.createObjectStore('interactionLog', { keyPath: 'id', autoIncrement: true });
-      interactionStore.createIndex('childIdIndex', 'childId', { unique: false });
-      interactionStore.createIndex('dateIndex', 'date', { unique: false });
-      interactionStore.createIndex('childDateIndex', ['childId', 'date'], { unique: false });
-      console.log('已創建 "interactionLog" Object Store');
-    }
-
-    // 9. 設定 Object Store
-    if (!db.objectStoreNames.contains('settings')) {
-      const settingsStore = db.createObjectStore('settings', { keyPath: 'id' });
-      console.log('已創建 "settings" Object Store');
-    }
-  }
-
-  /**
-   * 檢查資料庫連接是否存在，不存在則初始化
+   * 確保數據庫已連接，如未連接則初始化
+   * @returns {Promise<IDBDatabase>} 數據庫連接對象
    * @private
    */
   async _ensureDbConnection() {
-    if (!this.db) {
-      await this.initDatabase();
-    }
+    if (this.db) return this.db;
+    return this.initDatabase();
   }
 
   /**
-   * 獲取指定 Object Store 的事務
+   * 添加新記錄
    * @param {string} storeName - Object Store 名稱
-   * @param {string} mode - 事務模式 ('readonly' 或 'readwrite')
-   * @returns {IDBObjectStore} - Object Store 實例
-   * @private
-   */
-  _getObjectStore(storeName, mode = 'readonly') {
-    const transaction = this.db.transaction(storeName, mode);
-    return transaction.objectStore(storeName);
-  }
-
-  /**
-   * 新增項目到指定的 Object Store
-   * @param {string} storeName - Object Store 名稱
-   * @param {Object} data - 要新增的數據
-   * @returns {Promise<number>} 新增項目的 ID
+   * @param {Object} data - 要添加的數據對象
+   * @returns {Promise<number>} 返回新添加記錄的 ID
    */
   async add(storeName, data) {
     try {
       await this._ensureDbConnection();
-
+      
       return new Promise((resolve, reject) => {
         const transaction = this.db.transaction(storeName, 'readwrite');
         const store = transaction.objectStore(storeName);
         
-        // 添加時間戳（如果尚未提供）
-        if (!data.timestamp && !data.date && 
-            storeName !== 'children' && storeName !== 'settings') {
-          data.timestamp = Date.now();
+        // 添加當前時間戳（如果數據中未提供）
+        if (!data.timestamp && !data.date) {
+          data.timestamp = new Date().getTime();
         }
         
         const request = store.add(data);
-
+        
         request.onsuccess = (event) => {
-          resolve(event.target.result);
+          resolve(event.target.result); // 返回新添加記錄的 ID
         };
-
-        request.onerror = (event) => {
-          console.error(`添加到 "${storeName}" 失敗:`, event.target.error);
-          reject(new Error(`無法添加數據: ${event.target.error}`));
-        };
-
-        transaction.oncomplete = () => {
-          console.log(`數據已成功添加到 "${storeName}"`);
-        };
-      });
-    } catch (error) {
-      console.error(`添加到 "${storeName}" 失敗:`, error);
-      throw error;
-    }
-  }
-
-  /**
-   * 更新指定 Object Store 中的項目
-   * @param {string} storeName - Object Store 名稱
-   * @param {Object} data - 要更新的數據 (必須包含 keyPath 欄位)
-   * @returns {Promise<boolean>} 更新成功返回 true
-   */
-  async update(storeName, data) {
-    try {
-      await this._ensureDbConnection();
-
-      return new Promise((resolve, reject) => {
-        const transaction = this.db.transaction(storeName, 'readwrite');
-        const store = transaction.objectStore(storeName);
         
-        // 更新時間戳（如果適用）
-        if (storeName !== 'children' && storeName !== 'settings' && 
-            !data.updateTimestamp) {
-          data.updateTimestamp = Date.now();
-        }
-        
-        const request = store.put(data);
-
-        request.onsuccess = () => {
-          resolve(true);
-        };
-
         request.onerror = (event) => {
-          console.error(`更新 "${storeName}" 中的項目失敗:`, event.target.error);
-          reject(new Error(`無法更新數據: ${event.target.error}`));
+          console.error(`[BabyLogDB] 添加記錄失敗 (${storeName}):`, event.target.error);
+          reject(new Error(`添加記錄失敗: ${event.target.error.message}`));
         };
       });
     } catch (error) {
-      console.error(`更新 "${storeName}" 中的項目失敗:`, error);
-      throw error;
+      console.error(`[BabyLogDB] 添加記錄時出錯 (${storeName}):`, error);
+      throw new Error(`添加記錄失敗: ${error.message}`);
     }
   }
 
   /**
-   * 從指定的 Object Store 中刪除項目
+   * 取得單條記錄
    * @param {string} storeName - Object Store 名稱
-   * @param {number|string} id - 要刪除的項目 ID
-   * @returns {Promise<boolean>} 刪除成功返回 true
-   */
-  async delete(storeName, id) {
-    try {
-      await this._ensureDbConnection();
-
-      return new Promise((resolve, reject) => {
-        const transaction = this.db.transaction(storeName, 'readwrite');
-        const store = transaction.objectStore(storeName);
-        const request = store.delete(id);
-
-        request.onsuccess = () => {
-          resolve(true);
-        };
-
-        request.onerror = (event) => {
-          console.error(`從 "${storeName}" 刪除項目失敗:`, event.target.error);
-          reject(new Error(`無法刪除數據: ${event.target.error}`));
-        };
-      });
-    } catch (error) {
-      console.error(`從 "${storeName}" 刪除項目失敗:`, error);
-      throw error;
-    }
-  }
-
-  /**
-   * 從指定的 Object Store 中獲取單個項目
-   * @param {string} storeName - Object Store 名稱
-   * @param {number|string} id - 要獲取的項目 ID
-   * @returns {Promise<Object>} 獲取的項目
+   * @param {number|string} id - 記錄 ID 或主鍵值
+   * @returns {Promise<Object|null>} 返回找到的記錄或 null
    */
   async get(storeName, id) {
     try {
       await this._ensureDbConnection();
-
+      
       return new Promise((resolve, reject) => {
         const transaction = this.db.transaction(storeName, 'readonly');
         const store = transaction.objectStore(storeName);
         const request = store.get(id);
-
+        
         request.onsuccess = (event) => {
-          resolve(event.target.result);
+          resolve(event.target.result || null);
         };
-
+        
         request.onerror = (event) => {
-          console.error(`從 "${storeName}" 獲取項目失敗:`, event.target.error);
-          reject(new Error(`無法獲取數據: ${event.target.error}`));
+          console.error(`[BabyLogDB] 取得記錄失敗 (${storeName}):`, event.target.error);
+          reject(new Error(`取得記錄失敗: ${event.target.error.message}`));
         };
       });
     } catch (error) {
-      console.error(`從 "${storeName}" 獲取項目失敗:`, error);
-      throw error;
+      console.error(`[BabyLogDB] 取得記錄時出錯 (${storeName}):`, error);
+      throw new Error(`取得記錄失敗: ${error.message}`);
     }
   }
 
   /**
-   * 獲取指定 Object Store 中的所有項目
+   * 更新現有記錄
    * @param {string} storeName - Object Store 名稱
-   * @returns {Promise<Array>} 項目數組
+   * @param {Object} data - 要更新的數據對象（必須包含 ID 或主鍵）
+   * @returns {Promise<Object>} 返回更新後的記錄
+   */
+  async update(storeName, data) {
+    try {
+      await this._ensureDbConnection();
+      
+      return new Promise((resolve, reject) => {
+        const transaction = this.db.transaction(storeName, 'readwrite');
+        const store = transaction.objectStore(storeName);
+        
+        // 添加更新時間戳（如果適用）
+        if (!data.updatedAt) {
+          data.updatedAt = new Date().getTime();
+        }
+        
+        const request = store.put(data);
+        
+        request.onsuccess = (event) => {
+          resolve(data);
+        };
+        
+        request.onerror = (event) => {
+          console.error(`[BabyLogDB] 更新記錄失敗 (${storeName}):`, event.target.error);
+          reject(new Error(`更新記錄失敗: ${event.target.error.message}`));
+        };
+      });
+    } catch (error) {
+      console.error(`[BabyLogDB] 更新記錄時出錯 (${storeName}):`, error);
+      throw new Error(`更新記錄失敗: ${error.message}`);
+    }
+  }
+
+  /**
+   * 刪除記錄
+   * @param {string} storeName - Object Store 名稱
+   * @param {number|string} id - 記錄 ID 或主鍵值
+   * @returns {Promise<boolean>} 返回是否成功刪除
+   */
+  async delete(storeName, id) {
+    try {
+      await this._ensureDbConnection();
+      
+      return new Promise((resolve, reject) => {
+        const transaction = this.db.transaction(storeName, 'readwrite');
+        const store = transaction.objectStore(storeName);
+        const request = store.delete(id);
+        
+        request.onsuccess = () => {
+          resolve(true);
+        };
+        
+        request.onerror = (event) => {
+          console.error(`[BabyLogDB] 刪除記錄失敗 (${storeName}):`, event.target.error);
+          reject(new Error(`刪除記錄失敗: ${event.target.error.message}`));
+        };
+      });
+    } catch (error) {
+      console.error(`[BabyLogDB] 刪除記錄時出錯 (${storeName}):`, error);
+      throw new Error(`刪除記錄失敗: ${error.message}`);
+    }
+  }
+
+  /**
+   * 取得所有記錄
+   * @param {string} storeName - Object Store 名稱
+   * @returns {Promise<Array>} 返回記錄數組
    */
   async getAll(storeName) {
     try {
       await this._ensureDbConnection();
-
+      
       return new Promise((resolve, reject) => {
         const transaction = this.db.transaction(storeName, 'readonly');
         const store = transaction.objectStore(storeName);
         const request = store.getAll();
-
+        
         request.onsuccess = (event) => {
-          resolve(event.target.result);
+          resolve(event.target.result || []);
         };
-
+        
         request.onerror = (event) => {
-          console.error(`從 "${storeName}" 獲取所有項目失敗:`, event.target.error);
-          reject(new Error(`無法獲取數據: ${event.target.error}`));
+          console.error(`[BabyLogDB] 取得所有記錄失敗 (${storeName}):`, event.target.error);
+          reject(new Error(`取得所有記錄失敗: ${event.target.error.message}`));
         };
       });
     } catch (error) {
-      console.error(`從 "${storeName}" 獲取所有項目失敗:`, error);
-      throw error;
+      console.error(`[BabyLogDB] 取得所有記錄時出錯 (${storeName}):`, error);
+      throw new Error(`取得所有記錄失敗: ${error.message}`);
     }
   }
 
   /**
-   * 使用索引查詢項目
+   * 根據索引查詢記錄
    * @param {string} storeName - Object Store 名稱
    * @param {string} indexName - 索引名稱
-   * @param {*} value - 查詢值
-   * @returns {Promise<Array>} 匹配的項目數組
+   * @param {*} indexValue - 索引值
+   * @returns {Promise<Array>} 返回符合條件的記錄數組
    */
-  async getByIndex(storeName, indexName, value) {
+  async getByIndex(storeName, indexName, indexValue) {
     try {
       await this._ensureDbConnection();
-
+      
       return new Promise((resolve, reject) => {
         const transaction = this.db.transaction(storeName, 'readonly');
         const store = transaction.objectStore(storeName);
-        
-        // 確保索引存在
-        if (!store.indexNames.contains(indexName)) {
-          reject(new Error(`索引 "${indexName}" 不存在於 "${storeName}"`));
-          return;
-        }
-        
         const index = store.index(indexName);
-        const request = index.getAll(value);
-
+        const request = index.getAll(indexValue);
+        
         request.onsuccess = (event) => {
-          resolve(event.target.result);
+          resolve(event.target.result || []);
         };
-
+        
         request.onerror = (event) => {
-          console.error(`使用索引 "${indexName}" 查詢 "${storeName}" 失敗:`, event.target.error);
-          reject(new Error(`索引查詢失敗: ${event.target.error}`));
+          console.error(`[BabyLogDB] 根據索引查詢失敗 (${storeName}.${indexName}):`, event.target.error);
+          reject(new Error(`根據索引查詢失敗: ${event.target.error.message}`));
         };
       });
     } catch (error) {
-      console.error(`使用索引 "${indexName}" 查詢 "${storeName}" 失敗:`, error);
-      throw error;
+      console.error(`[BabyLogDB] 根據索引查詢時出錯 (${storeName}.${indexName}):`, error);
+      throw new Error(`根據索引查詢失敗: ${error.message}`);
     }
   }
 
   /**
-   * 使用複合索引查詢項目
+   * 根據索引範圍查詢記錄
    * @param {string} storeName - Object Store 名稱
-   * @param {string} indexName - 複合索引名稱
-   * @param {Array} values - 查詢值數組，須與複合索引中的欄位順序相符
-   * @returns {Promise<Array>} 匹配的項目數組
+   * @param {string} indexName - 索引名稱
+   * @param {IDBKeyRange} range - 索引範圍
+   * @returns {Promise<Array>} 返回符合條件的記錄數組
    */
-  async getByCompositeIndex(storeName, indexName, values) {
+  async getByRange(storeName, indexName, range) {
     try {
       await this._ensureDbConnection();
-
+      
       return new Promise((resolve, reject) => {
         const transaction = this.db.transaction(storeName, 'readonly');
         const store = transaction.objectStore(storeName);
-        
-        // 確保索引存在
-        if (!store.indexNames.contains(indexName)) {
-          reject(new Error(`複合索引 "${indexName}" 不存在於 "${storeName}"`));
-          return;
-        }
-        
         const index = store.index(indexName);
-        // 使用IDBKeyRange.only來匹配精確的複合鍵值
-        const keyRange = IDBKeyRange.only(values);
-        const request = index.getAll(keyRange);
-
+        const request = index.getAll(range);
+        
         request.onsuccess = (event) => {
-          resolve(event.target.result);
+          resolve(event.target.result || []);
         };
-
+        
         request.onerror = (event) => {
-          console.error(`使用複合索引 "${indexName}" 查詢 "${storeName}" 失敗:`, event.target.error);
-          reject(new Error(`複合索引查詢失敗: ${event.target.error}`));
+          console.error(`[BabyLogDB] 範圍查詢失敗 (${storeName}.${indexName}):`, event.target.error);
+          reject(new Error(`範圍查詢失敗: ${event.target.error.message}`));
         };
       });
     } catch (error) {
-      console.error(`使用複合索引 "${indexName}" 查詢 "${storeName}" 失敗:`, error);
-      throw error;
+      console.error(`[BabyLogDB] 範圍查詢時出錯 (${storeName}.${indexName}):`, error);
+      throw new Error(`範圍查詢失敗: ${error.message}`);
     }
   }
 
   /**
-   * 使用日期範圍查詢項目
+   * 獲取特定孩子的指定時間範圍內的記錄
    * @param {string} storeName - Object Store 名稱
-   * @param {string} indexName - 日期索引名稱 (如 'timestampIndex' 或 'dateIndex')
-   * @param {Date|number} startDate - 範圍開始日期
-   * @param {Date|number} endDate - 範圍結束日期
-   * @returns {Promise<Array>} 在日期範圍內的項目數組
+   * @param {number|string} childId - 孩子 ID
+   * @param {number} startTime - 開始時間戳
+   * @param {number} endTime - 結束時間戳
+   * @returns {Promise<Array>} 返回符合條件的記錄數組
    */
-  async getByDateRange(storeName, indexName, startDate, endDate) {
+  async getChildRecordsByTimeRange(storeName, childId, startTime, endTime) {
     try {
       await this._ensureDbConnection();
-
-      return new Promise((resolve, reject) => {
-        const transaction = this.db.transaction(storeName, 'readonly');
-        const store = transaction.objectStore(storeName);
-        
-        // 確保索引存在
-        if (!store.indexNames.contains(indexName)) {
-          reject(new Error(`日期索引 "${indexName}" 不存在於 "${storeName}"`));
-          return;
-        }
-        
-        // 轉換日期參數為數字時間戳（如果尚未轉換）
-        const start = startDate instanceof Date ? startDate.getTime() : startDate;
-        const end = endDate instanceof Date ? endDate.getTime() : endDate;
-        
-        const index = store.index(indexName);
-        // 創建一個範圍查詢
-        const keyRange = IDBKeyRange.bound(start, end, false, false);
-        const request = index.getAll(keyRange);
-
-        request.onsuccess = (event) => {
-          resolve(event.target.result);
-        };
-
-        request.onerror = (event) => {
-          console.error(`使用日期範圍查詢 "${storeName}" 失敗:`, event.target.error);
-          reject(new Error(`日期範圍查詢失敗: ${event.target.error}`));
-        };
-      });
+      
+      // 決定使用哪個索引，根據 storeName 來確定
+      let indexName, timeField;
+      
+      if (storeName === 'sleep') {
+        indexName = 'childIdAndStartTime';
+        timeField = 'startTime';
+      } else {
+        indexName = 'childIdAndTimestamp';
+        timeField = 'timestamp';
+      }
+      
+      // 創建日期範圍
+      const range = IDBKeyRange.bound(
+        [childId, startTime],
+        [childId, endTime]
+      );
+      
+      return this.getByRange(storeName, indexName, range);
     } catch (error) {
-      console.error(`使用日期範圍查詢 "${storeName}" 失敗:`, error);
-      throw error;
+      console.error(`[BabyLogDB] 獲取孩子在時間範圍內的記錄時出錯 (${storeName}):`, error);
+      throw new Error(`獲取孩子在時間範圍內的記錄失敗: ${error.message}`);
     }
   }
 
   /**
-   * 獲取特定子女在日期範圍內的記錄
+   * 獲取特定孩子的所有記錄
    * @param {string} storeName - Object Store 名稱
-   * @param {string} indexName - 複合索引名稱 (如 'childTimestampIndex')
-   * @param {number|string} childId - 子女 ID
-   * @param {Date|number} startDate - 範圍開始日期
-   * @param {Date|number} endDate - 範圍結束日期
-   * @returns {Promise<Array>} 符合條件的項目數組
+   * @param {number|string} childId - 孩子 ID
+   * @returns {Promise<Array>} 返回符合條件的記錄數組
    */
-  async getChildRecordsByDateRange(storeName, indexName, childId, startDate, endDate) {
-    try {
-      await this._ensureDbConnection();
-
-      return new Promise((resolve, reject) => {
-        const transaction = this.db.transaction(storeName, 'readonly');
-        const store = transaction.objectStore(storeName);
-        
-        // 確保索引存在
-        if (!store.indexNames.contains(indexName)) {
-          reject(new Error(`複合索引 "${indexName}" 不存在於 "${storeName}"`));
-          return;
-        }
-        
-        // 轉換日期參數為數字時間戳（如果尚未轉換）
-        const start = startDate instanceof Date ? startDate.getTime() : startDate;
-        const end = endDate instanceof Date ? endDate.getTime() : endDate;
-        
-        // 建立游標查詢
-        const index = store.index(indexName);
-        const results = [];
-        
-        // 創建範圍約束，第一個元素精確匹配 childId，第二個元素在時間範圍內
-        // 注意：由於IDBKeyRange的限制，這裡採用游標遍歷而非直接getAll
-        const request = index.openCursor();
-        
-        request.onsuccess = (event) => {
-          const cursor = event.target.result;
-          
-          if (cursor) {
-            // 檢查是否符合我們的條件（childId 匹配且時間戳在範圍內）
-            const [cursorChildId, cursorTimestamp] = cursor.key;
-            
-            if (cursorChildId === childId && cursorTimestamp >= start && cursorTimestamp <= end) {
-              results.push(cursor.value);
-            }
-            
-            // 如果當前 childId 已經大於目標 childId，無需繼續
-            // 否則繼續遍歷下一個記錄
-            if (cursorChildId > childId) {
-              resolve(results);
-            } else {
-              cursor.continue();
-            }
-          } else {
-            // 遍歷完成，返回結果
-            resolve(results);
-          }
-        };
-
-        request.onerror = (event) => {
-          console.error(`獲取子女日期範圍記錄失敗:`, event.target.error);
-          reject(new Error(`查詢失敗: ${event.target.error}`));
-        };
-      });
-    } catch (error) {
-      console.error(`獲取子女日期範圍記錄失敗:`, error);
-      throw error;
-    }
+  async getChildRecords(storeName, childId) {
+    return this.getByIndex(storeName, 'childId', childId);
   }
 
   /**
-   * 清空指定的 Object Store
+   * 清除整個 Object Store 中的所有數據
    * @param {string} storeName - Object Store 名稱
-   * @returns {Promise<boolean>} 清空成功返回 true
+   * @returns {Promise<boolean>} 返回是否成功清除
    */
-  async clearStore(storeName) {
+  async clear(storeName) {
     try {
       await this._ensureDbConnection();
-
+      
       return new Promise((resolve, reject) => {
         const transaction = this.db.transaction(storeName, 'readwrite');
         const store = transaction.objectStore(storeName);
         const request = store.clear();
-
+        
         request.onsuccess = () => {
-          console.log(`已清空 "${storeName}" Object Store`);
+          console.log(`[BabyLogDB] 已清除 Object Store: ${storeName}`);
           resolve(true);
         };
-
+        
         request.onerror = (event) => {
-          console.error(`清空 "${storeName}" 失敗:`, event.target.error);
-          reject(new Error(`無法清空數據: ${event.target.error}`));
+          console.error(`[BabyLogDB] 清除 Object Store 失敗 (${storeName}):`, event.target.error);
+          reject(new Error(`清除數據失敗: ${event.target.error.message}`));
         };
       });
     } catch (error) {
-      console.error(`清空 "${storeName}" 失敗:`, error);
-      throw error;
+      console.error(`[BabyLogDB] 清除 Object Store 時出錯 (${storeName}):`, error);
+      throw new Error(`清除數據失敗: ${error.message}`);
     }
   }
 
   /**
-   * 獲取所有數據的備份（按 Object Store 分類）
-   * @returns {Promise<Object>} 包含所有數據的物件，按 Object Store 分類
+   * 導出整個數據庫的數據（備份功能）
+   * @returns {Promise<Object>} 返回包含所有數據的對象
    */
-  async exportAllData() {
+  async exportDatabase() {
     try {
       await this._ensureDbConnection();
-      
       const exportData = {};
-      const storeNames = Array.from(this.db.objectStoreNames);
       
-      // 為每個 Object Store 獲取所有數據
-      const promises = storeNames.map(async (storeName) => {
+      // 遍歷所有 Object Stores 並收集數據
+      for (const storeName of Object.keys(this.objectStores)) {
         exportData[storeName] = await this.getAll(storeName);
-      });
-      
-      await Promise.all(promises);
-      
-      // 添加中繼數據
-      exportData._metadata = {
-        exportDate: new Date().toISOString(),
-        dbName: this.dbName,
-        dbVersion: this.dbVersion,
-        exportVersion: '1.0'
-      };
+      }
       
       return exportData;
     } catch (error) {
-      console.error('導出所有數據失敗:', error);
-      throw error;
+      console.error('[BabyLogDB] 導出數據庫時出錯:', error);
+      throw new Error(`導出數據庫失敗: ${error.message}`);
     }
   }
 
   /**
-   * 從備份數據恢復資料庫
-   * @param {Object} importData - 從 exportAllData() 得到的備份數據
-   * @returns {Promise<boolean>} 導入成功返回 true
+   * 導入數據到數據庫（恢復備份）
+   * @param {Object} importData - 要導入的數據
+   * @param {boolean} clearExisting - 是否在導入前清除現有數據
+   * @returns {Promise<boolean>} 返回是否成功導入
    */
-  async importAllData(importData) {
+  async importDatabase(importData, clearExisting = true) {
     try {
       await this._ensureDbConnection();
       
-      // 驗證導入數據
-      if (!importData || typeof importData !== 'object' || !importData._metadata) {
-        throw new Error('無效的備份數據格式');
+      // 確認導入數據的格式是否正確
+      if (!importData || typeof importData !== 'object') {
+        throw new Error('導入數據格式不正確');
       }
       
-      // 獲取 Object Store 名稱列表
-      const storeNames = Array.from(this.db.objectStoreNames);
-      
-      // 開始事務，為每個 Object Store 導入數據
-      for (const storeName of storeNames) {
-        if (importData[storeName] && Array.isArray(importData[storeName])) {
-          
-          // 首先清空 Object Store
-          await this.clearStore(storeName);
-          
-          // 然後導入每條記錄
-          const records = importData[storeName];
-          for (const record of records) {
-            await this.add(storeName, record);
+      // 開始導入過程
+      for (const [storeName, data] of Object.entries(importData)) {
+        // 檢查 Object Store 是否存在
+        if (!this.objectStores[storeName]) {
+          console.warn(`[BabyLogDB] 跳過不存在的 Object Store: ${storeName}`);
+          continue;
+        }
+        
+        // 如果需要，清除現有數據
+        if (clearExisting) {
+          await this.clear(storeName);
+        }
+        
+        // 添加數據
+        if (Array.isArray(data)) {
+          for (const item of data) {
+            if (clearExisting) {
+              // 避免主鍵衝突，刪除 ID 讓系統自動生成
+              const { id, ...newItem } = item;
+              await this.add(storeName, newItem);
+            } else {
+              // 嘗試先更新，如果失敗則添加
+              try {
+                await this.update(storeName, item);
+              } catch (error) {
+                const { id, ...newItem } = item;
+                await this.add(storeName, newItem);
+              }
+            }
           }
-          
-          console.log(`已成功將 ${records.length} 條記錄導入 "${storeName}"`);
         }
       }
       
-      console.log('數據庫恢復完成');
+      console.log('[BabyLogDB] 數據庫導入成功');
       return true;
     } catch (error) {
-      console.error('導入數據失敗:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * 刪除整個資料庫
-   * @returns {Promise<boolean>} 刪除成功返回 true
-   */
-  async deleteDatabase() {
-    try {
-      // 關閉現有連接
-      if (this.db) {
-        this.db.close();
-        this.db = null;
-      }
-
-      return new Promise((resolve, reject) => {
-        const request = indexedDB.deleteDatabase(this.dbName);
-
-        request.onsuccess = () => {
-          console.log(`資料庫 "${this.dbName}" 已成功刪除`);
-          resolve(true);
-        };
-
-        request.onerror = (event) => {
-          console.error(`刪除資料庫 "${this.dbName}" 失敗:`, event.target.error);
-          reject(new Error(`無法刪除資料庫: ${event.target.error}`));
-        };
-      });
-    } catch (error) {
-      console.error(`刪除資料庫 "${this.dbName}" 失敗:`, error);
-      throw error;
+      console.error('[BabyLogDB] 導入數據庫時出錯:', error);
+      throw new Error(`導入數據庫失敗: ${error.message}`);
     }
   }
 }
 
-// 導出 BabyDB 類
-export default BabyDB;
+// 導出數據庫類
+export default BabyLogDB;
