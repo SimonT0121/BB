@@ -214,6 +214,219 @@
                 </div>
             </section>
 
+            <!-- 健康管理視圖 -->
+            <section id="healthView" class="app-view">
+                <div class="section-header">
+                    <h2>健康管理</h2>
+                    <button id="addHealthRecordButton" class="action-button">
+                        <i class="fas fa-plus"></i>
+                        <span>添加記錄</span>
+                    </button>
+                </div>
+                
+                <!-- 日期選擇器 -->
+                <div class="date-selector">
+                    <button id="prevHealthDate" class="date-nav"><i class="fas fa-chevron-left"></i></button>
+                    <div id="selectedHealthDate" class="selected-date">2025年5月18日</div>
+                    <button id="nextHealthDate" class="date-nav"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                
+                <!-- 健康記錄分類標籤 -->
+                <div class="category-tabs health-tabs">
+                    <button class="category-tab active" data-category="all">全部</button>
+                    <button class="category-tab" data-category="vaccination">疫苗接種</button>
+                    <button class="category-tab" data-category="medication">用藥記錄</button>
+                    <button class="category-tab" data-category="illness">疾病記錄</button>
+                    <button class="category-tab" data-category="checkup">體檢記錄</button>
+                    <button class="category-tab" data-category="allergy">過敏記錄</button>
+                </div>
+                
+                <!-- 健康記錄容器 -->
+                <div class="health-records-container" id="healthRecordsContainer">
+                    <!-- 將由JavaScript動態填充 -->
+                    <div class="placeholder-content">
+                        <p>選擇一個孩子和日期來查看健康記錄</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 成長里程碑視圖 -->
+            <section id="milestonesView" class="app-view">
+                <div class="section-header">
+                    <h2>成長里程碑</h2>
+                    <button id="addMilestoneButton" class="action-button">
+                        <i class="fas fa-plus"></i>
+                        <span>添加里程碑</span>
+                    </button>
+                </div>
+                
+                <!-- 里程碑類別標籤 -->
+                <div class="category-tabs milestone-tabs">
+                    <button class="category-tab active" data-category="all">全部</button>
+                    <button class="category-tab" data-category="motor">運動技能</button>
+                    <button class="category-tab" data-category="language">語言能力</button>
+                    <button class="category-tab" data-category="social">社交情感</button>
+                    <button class="category-tab" data-category="cognitive">認知發展</button>
+                    <button class="category-tab" data-category="self_help">自理能力</button>
+                </div>
+                
+                <!-- 里程碑容器 -->
+                <div class="milestones-container" id="milestonesContainer">
+                    <!-- 將由JavaScript動態填充 -->
+                    <div class="placeholder-content">
+                        <p>選擇一個孩子來查看已達成的里程碑</p>
+                    </div>
+                </div>
+                
+                <!-- 待達成里程碑 -->
+                <div class="upcoming-milestones">
+                    <h3>接下來可能達成的里程碑</h3>
+                    <div id="upcomingMilestones" class="upcoming-milestones-list">
+                        <!-- 將由JavaScript動態填充 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 數據分析視圖 -->
+            <section id="reportsView" class="app-view">
+                <div class="section-header">
+                    <h2>數據分析</h2>
+                    <div class="view-controls">
+                        <button class="view-control active" data-view="day">日</button>
+                        <button class="view-control" data-view="week">週</button>
+                        <button class="view-control" data-view="month">月</button>
+                    </div>
+                </div>
+                
+                <!-- 日期選擇器 -->
+                <div class="date-selector">
+                    <button id="prevReportDate" class="date-nav"><i class="fas fa-chevron-left"></i></button>
+                    <div id="selectedReportDate" class="selected-date">2025年5月</div>
+                    <button id="nextReportDate" class="date-nav"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                
+                <!-- 報告類型選擇 -->
+                <div class="report-type-selector">
+                    <button class="report-type active" data-report="sleeping">睡眠</button>
+                    <button class="report-type" data-report="feeding">餵食</button>
+                    <button class="report-type" data-report="diaper">尿布</button>
+                    <button class="report-type" data-report="growth">成長</button>
+                </div>
+                
+                <!-- 圖表容器 -->
+                <div class="chart-container">
+                    <canvas id="reportChart"></canvas>
+                </div>
+                
+                <!-- 摘要統計 -->
+                <div class="report-summary" id="reportSummary">
+                    <!-- 將由JavaScript動態填充 -->
+                </div>
+            </section>
+
+            <!-- 親子日記視圖 -->
+            <section id="reflectionView" class="app-view">
+                <div class="section-header">
+                    <h2>親子日記</h2>
+                    <button id="addReflectionButton" class="action-button">
+                        <i class="fas fa-plus"></i>
+                        <span>新增日記</span>
+                    </button>
+                </div>
+                
+                <!-- 日記列表 -->
+                <div class="reflection-list" id="reflectionList">
+                    <!-- 將由JavaScript動態填充 -->
+                    <div class="placeholder-content">
+                        <p>還沒有日記記錄</p>
+                        <p>記錄您與寶寶的日常感受和想法</p>
+                    </div>
+                </div>
+                
+                <!-- 寫日記表單 -->
+                <div class="write-reflection">
+                    <h3>今日日記</h3>
+                    <div class="reflection-form">
+                        <div class="form-group">
+                            <label for="reflectionTitle">標題</label>
+                            <input type="text" id="reflectionTitle" placeholder="為今天的記錄取個標題">
+                        </div>
+                        <div class="form-group">
+                            <label for="reflectionText">內容</label>
+                            <textarea id="reflectionText" placeholder="分享您今天的感受和想法..."></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button id="saveReflectionNote" class="primary-button">保存日記</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 設定視圖 -->
+            <section id="settingsView" class="app-view">
+                <div class="section-header">
+                    <h2>設定</h2>
+                </div>
+                
+                <!-- 應用程式設定 -->
+                <div class="settings-section">
+                    <h3>應用程式設定</h3>
+                    
+                    <!-- 主題設定 -->
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <h4>主題模式</h4>
+                            <p>選擇淺色或深色模式</p>
+                        </div>
+                        <div class="setting-control">
+                            <select id="themeSelector">
+                                <option value="light">淺色模式</option>
+                                <option value="dark">深色模式</option>
+                                <option value="system">跟隨系統</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- 通知設定 -->
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <h4>提醒通知</h4>
+                            <p>設定是否接收定時提醒</p>
+                        </div>
+                        <div class="setting-control">
+                            <label class="switch">
+                                <input type="checkbox" id="notificationToggle">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- 數據設定 -->
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <h4>數據管理</h4>
+                        </div>
+                        <div class="setting-control setting-buttons">
+                            <button id="exportDataButton" class="secondary-button">導出數據</button>
+                            <button id="importDataButton" class="secondary-button">導入數據</button>
+                            <button id="clearDataButton" class="danger-button">清除所有數據</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 關於 -->
+                <div class="settings-section">
+                    <h3>關於應用程式</h3>
+                    <div class="about-app">
+                        <h4>寶貝日誌</h4>
+                        <p>版本: 1.0.0</p>
+                        <p>專注於親子互動與情感支持的嬰幼兒照顧追蹤應用</p>
+                        <p>© 2025 BabyLog 開發團隊</p>
+                        <p><a href="#" id="privacyPolicyLink">隱私政策</a> | <a href="#" id="termsOfServiceLink">使用條款</a></p>
+                    </div>
+                </div>
+            </section>
+
             <!-- 更多視圖將在這裡添加... -->
             <!-- 各種表單和模態窗口也將在這裡添加... -->
         </main>
@@ -292,6 +505,6 @@
     <script src="js/db.js" type="module"></script>
     <script src="js/ui.js" type="module"></script>
     <script src="js/app.js" type="module"></script>
- <script src="js/debug.js" type="module"></script>
+    <script src="js/debug.js" type="module"></script>
 </body>
 </html>
