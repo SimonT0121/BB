@@ -89,7 +89,7 @@ class App {
     }
   }
 
-  /**
+/**
    * 從本地存儲加載用戶偏好設置
    */
   loadUserPreferences() {
@@ -157,7 +157,7 @@ class App {
     }
   }
 
-  /**
+/**
    * 綁定全局事件監聽器
    */
   bindEventListeners() {
@@ -248,27 +248,89 @@ class App {
       });
     });
 
-    // 添加下列功能的按鈕綁定
+    // 健康記錄按鈕
     document.getElementById('addHealthRecordButton')?.addEventListener('click', () => {
       this.showHealthForm();
     });
 
+    // 里程碑按鈕
     document.getElementById('addMilestoneButton')?.addEventListener('click', () => {
       this.showMilestoneForm();
     });
 
+    // 反思日記按鈕
     document.getElementById('addReflectionButton')?.addEventListener('click', () => {
       this.showReflectionForm();
     });
 
+    // 保存反思按鈕
     document.getElementById('saveReflectionNote')?.addEventListener('click', () => {
       this.saveReflectionNote();
+    });
+
+    // 事件委託：處理某些動態生成的元素的事件
+    document.addEventListener('addHealthRecord', () => {
+      this.showHealthForm();
+    });
+
+    document.addEventListener('addMilestone', () => {
+      this.showMilestoneForm();
+    });
+
+    document.addEventListener('editHealthRecord', (e) => {
+      const { id, type } = e.detail;
+      // 實現編輯健康記錄的方法
+      console.log(`[App] 編輯健康記錄: ${id}, 類型: ${type}`);
+      this.ui.showToast('編輯功能尚未實現', 'info');
+    });
+
+    document.addEventListener('deleteHealthRecord', (e) => {
+      const { id, type } = e.detail;
+      // 實現刪除健康記錄的方法
+      console.log(`[App] 刪除健康記錄: ${id}, 類型: ${type}`);
+      this.ui.showToast('刪除功能尚未實現', 'info');
+    });
+
+    document.addEventListener('editMilestone', (e) => {
+      const { id } = e.detail;
+      console.log(`[App] 編輯里程碑: ${id}`);
+      this.ui.showToast('編輯功能尚未實現', 'info');
+    });
+
+    document.addEventListener('deleteMilestone', (e) => {
+      const { id } = e.detail;
+      console.log(`[App] 刪除里程碑: ${id}`);
+      this.ui.showToast('刪除功能尚未實現', 'info');
+    });
+
+    document.addEventListener('recordMilestone', (e) => {
+      const { category, milestoneId } = e.detail;
+      console.log(`[App] 記錄里程碑達成: ${category}_${milestoneId}`);
+      this.ui.showToast('記錄功能尚未實現', 'info');
+    });
+
+    document.addEventListener('viewFullReflection', (e) => {
+      const { id } = e.detail;
+      console.log(`[App] 查看完整反思: ${id}`);
+      this.ui.showToast('查看功能尚未實現', 'info');
+    });
+
+    document.addEventListener('editReflection', (e) => {
+      const { id } = e.detail;
+      console.log(`[App] 編輯反思: ${id}`);
+      this.ui.showToast('編輯功能尚未實現', 'info');
+    });
+
+    document.addEventListener('deleteReflection', (e) => {
+      const { id } = e.detail;
+      console.log(`[App] 刪除反思: ${id}`);
+      this.ui.showToast('刪除功能尚未實現', 'info');
     });
     
     console.log('[App] 已綁定所有事件監聽器');
   }
 
-  /**
+/**
    * 處理導航事件
    * @param {Event} e - 事件對象
    */
@@ -339,7 +401,7 @@ class App {
     }
   }
 
-  /**
+/**
    * 處理首次使用完成
    */
   async handleFirstUseComplete() {
@@ -372,7 +434,7 @@ class App {
     this.changeView('home');
   }
 
-  /**
+/**
    * 加載首頁視圖數據
    */
   async loadHomeViewData() {
@@ -569,7 +631,7 @@ class App {
     }
   }
 
-  /**
+/**
    * 加載孩子列表
    */
   async loadChildrenList() {
@@ -671,7 +733,7 @@ class App {
     });
   }
 
-  /**
+/**
    * 處理添加孩子表單提交
    * @param {Event} e - 事件對象
    */
@@ -825,7 +887,7 @@ class App {
     }
   }
 
-  /**
+/**
    * 處理編輯孩子表單提交
    * @param {Event} e - 事件對象
    */
@@ -972,7 +1034,7 @@ class App {
     }
   }
 
-  /**
+/**
    * 處理視圖變更事件
    * @param {Event} e - 事件對象
    */
@@ -1180,7 +1242,7 @@ class App {
     console.log(`[App] 已切換主題模式: ${this.state.themeMode}`);
   }
 
-  /**
+/**
    * 備份數據
    */
   async backupData() {
@@ -1319,7 +1381,7 @@ class App {
     });
   }
 
-  /**
+/**
    * 加載健康記錄
    * @param {string|number} [childId] - 可選的孩子 ID，未提供則使用當前選定的孩子
    */
@@ -1435,7 +1497,7 @@ class App {
     }
   }
 
-  /**
+/**
    * 顯示健康記錄表單
    */
   showHealthForm() {
@@ -1673,7 +1735,7 @@ class App {
     }
   }
 
-  /**
+/**
    * 加載里程碑數據
    * @param {string|number} [childId] - 可選的孩子 ID，未提供則使用當前選定的孩子
    */
@@ -1917,7 +1979,7 @@ class App {
     }
   }
 
-  /**
+/**
    * 加載數據分析報告
    * @param {string|number} [childId] - 可選的孩子 ID，未提供則使用當前選定的孩子
    */
@@ -2094,7 +2156,7 @@ class App {
     }
   }
 
-  /**
+/**
    * 加載反思日記數據
    */
   async loadReflectionData() {
@@ -2243,10 +2305,10 @@ class App {
     }
   }
 
-  /**
+/**
    * 加載設置
    */
-loadSettings() {
+  loadSettings() {
     try {
       // 載入主題設置
       const themeSelector = document.getElementById('themeSelector');
@@ -2437,7 +2499,7 @@ loadSettings() {
     });
   }
 
-  /**
+/**
    * 過濾活動按類別
    * @param {string} category - 類別名稱
    */
@@ -2482,6 +2544,101 @@ loadSettings() {
     }
     
     console.log(`[App] 已過濾活動: ${category}`);
+  }
+
+  /**
+   * 聚焦到反思輸入框
+   */
+  focusReflection() {
+    const reflectionInput = document.getElementById('reflectionInput');
+    if (reflectionInput) {
+      reflectionInput.focus();
+      // 滾動到反思區域
+      reflectionInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      // 如果反思輸入框不存在，切換到首頁
+      this.changeView('home');
+      // 稍後再聚焦
+      setTimeout(() => {
+        const input = document.getElementById('reflectionInput');
+        if (input) {
+          input.focus();
+          input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 300);
+    }
+  }
+
+  /**
+   * 顯示餵食表單
+   */
+  showFeedingForm() {
+    // TODO: 實現餵食表單
+    this.ui.showToast('餵食記錄功能開發中', 'info');
+    console.log('[App] 顯示餵食表單');
+  }
+
+  /**
+   * 顯示睡眠表單
+   */
+  showSleepForm() {
+    // TODO: 實現睡眠表單
+    this.ui.showToast('睡眠記錄功能開發中', 'info');
+    console.log('[App] 顯示睡眠表單');
+  }
+
+  /**
+   * 顯示尿布表單
+   */
+  showDiaperForm() {
+    // TODO: 實現尿布表單
+    this.ui.showToast('尿布記錄功能開發中', 'info');
+    console.log('[App] 顯示尿布表單');
+  }
+
+  /**
+   * 顯示筆記表單
+   */
+  showNoteForm() {
+    // TODO: 實現筆記表單
+    this.ui.showToast('筆記功能開發中', 'info');
+    console.log('[App] 顯示筆記表單');
+  }
+
+  /**
+   * 處理餵食表單提交
+   * @param {HTMLFormElement} form - 表單元素
+   */
+  async handleFeedingFormSubmit(form) {
+    // TODO: 實現餵食表單提交
+    console.log('[App] 處理餵食表單提交');
+  }
+
+  /**
+   * 處理睡眠表單提交
+   * @param {HTMLFormElement} form - 表單元素
+   */
+  async handleSleepFormSubmit(form) {
+    // TODO: 實現睡眠表單提交
+    console.log('[App] 處理睡眠表單提交');
+  }
+
+  /**
+   * 處理尿布表單提交
+   * @param {HTMLFormElement} form - 表單元素
+   */
+  async handleDiaperFormSubmit(form) {
+    // TODO: 實現尿布表單提交
+    console.log('[App] 處理尿布表單提交');
+  }
+
+  /**
+   * 處理筆記表單提交
+   * @param {HTMLFormElement} form - 表單元素
+   */
+  async handleNoteFormSubmit(form) {
+    // TODO: 實現筆記表單提交
+    console.log('[App] 處理筆記表單提交');
   }
 }
 
