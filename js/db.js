@@ -1,9 +1,9 @@
 'use strict';
 
 /**
- * @fileoverview IndexedDB 操作模組 - 負責所有數據庫相關操作
+ * @fileoverview IndexedDB 操作模組 - 負責所有數據庫相關操作（修復版本）
  * @author BabyLog 開發團隊
- * @version 1.0.0
+ * @version 1.0.1
  */
 
 /**
@@ -85,6 +85,7 @@ class BabyLogDB {
           { name: 'childId', keyPath: 'childId', options: { unique: false } },
           { name: 'date', keyPath: 'date', options: { unique: false } },
           { name: 'category', keyPath: 'category', options: { unique: false } },
+          { name: 'childIdAndDate', keyPath: ['childId', 'date'], options: { unique: false } },
           { name: 'childIdAndCategory', keyPath: ['childId', 'category'], options: { unique: false } }
         ]
       },
@@ -101,7 +102,8 @@ class BabyLogDB {
         keyPath: 'id', 
         autoIncrement: true,
         indexes: [
-          { name: 'date', keyPath: 'date', options: { unique: false } }
+          { name: 'date', keyPath: 'date', options: { unique: false } },
+          { name: 'timestamp', keyPath: 'timestamp', options: { unique: false } }
         ]
       }
     };
@@ -404,7 +406,7 @@ class BabyLogDB {
   }
 
   /**
-   * 獲取特定孩子的指定時間範圍內的記錄
+   * 獲取特定孩子的指定時間範圍內的記錄（修復版本）
    * @param {string} storeName - Object Store 名稱
    * @param {number|string} childId - 孩子 ID
    * @param {number} startTime - 開始時間戳
@@ -415,27 +417,132 @@ class BabyLogDB {
     try {
       await this._ensureDbConnection();
       
-      // 決定使用哪個索引，根據 storeName 來確定
-      let indexName, timeField;
+      // 確保 childId 是數字類型
+      const numericChildId = parseInt(childId);
       
-      if (storeName === 'sleep') {
-        indexName = 'childIdAndStartTime';
-        timeField = 'startTime';
-      } else {
-        indexName = 'childIdAndTimestamp';
-        timeField = 'timestamp';
+      // 決定使用哪個查詢方法，根據 storeName 來確定
+      switch (storeName) {
+        case 'health':
+          // 健康記錄使用日期範圍查詢
+          return this.getHealthRecordsByDateRange(numericChildId, startTime, endTime);
+        
+        case 'milestones':
+          // 里程碑記錄使用日期範圍查詢
+          return this.getMilestonesByDateRange(numericChildId, startTime, endTime);
+        
+        case 'interactionLog':
+          // 互動日誌使用日期範圍查詢
+          return this.getInteractionLogsByDateRange(numericChildId, startTime, endTime);
+        
+        case 'sleep':
+          // 睡眠記錄使用時間戳範圍
+          const sleepRange = IDBKeyRange.bound(
+            [numericChildId, startTime],
+            [numericChildId, endTime]
+          );
+          return this.getByRange(storeName, 'childIdAndStartTime', sleepRange);
+        
+        case 'feeding':
+        case 'diaper':
+        case 'moodBehavior':
+        default:
+          // 其他記錄使用時間戳範圍
+          const timestampRange = IDBKeyRange.bound(
+            [numericChildId, startTime],
+            [numericChildId, endTime]
+          );
+          return this.getByRange(storeName, 'childIdAndTimestamp', timestampRange);
       }
-      
-      // 創建日期範圍
-      const range = IDBKeyRange.bound(
-        [childId, startTime],
-        [childId, endTime]
-      );
-      
-      return this.getByRange(storeName, indexName, range);
     } catch (error) {
       console.error(`[BabyLogDB] 獲取孩子在時間範圍內的記錄時出錯 (${storeName}):`, error);
       throw new Error(`獲取孩子在時間範圍內的記錄失敗: ${error.message}`);
+    }
+  }
+
+  /**
+   * 獲取健康記錄的特殊方法（使用日期範圍）
+   * @param {number} childId - 孩子 ID
+   * @param {number} startTime - 開始時間戳
+   * @param {number} endTime - 結束時間戳
+   * @returns {Promise<Array>} 返回符合條件的健康記錄數組
+   */
+  async getHealthRecordsByDateRange(childId, startTime, endTime) {
+    try {
+      // 轉換時間戳為日期字符串
+      const startDate = new Date(startTime).toISOString().split('T')[0];
+      const endDate = new Date(endTime).toISOString().split('T')[0];
+      
+      // 獲取該孩子的所有健康記錄
+      const allRecords = await this.getByIndex('health', 'childId', childId);
+      
+      // 過濾出在日期範圍內的記錄
+      const filteredRecords = allRecords.filter(record => {
+        const recordDate = record.date;
+        return recordDate >= startDate && recordDate <= endDate;
+      });
+      
+      return filteredRecords;
+    } catch (error) {
+      console.error(`[BabyLogDB] 獲取健康記錄日期範圍時出錯:`, error);
+      throw new Error(`獲取健康記錄失敗: ${error.message}`);
+    }
+  }
+
+  /**
+   * 獲取里程碑記錄的特殊方法（使用日期範圍）
+   * @param {number} childId - 孩子 ID
+   * @param {number} startTime - 開始時間戳
+   * @param {number} endTime - 結束時間戳
+   * @returns {Promise<Array>} 返回符合條件的里程碑記錄數組
+   */
+  async getMilestonesByDateRange(childId, startTime, endTime) {
+    try {
+      // 轉換時間戳為日期字符串
+      const startDate = new Date(startTime).toISOString().split('T')[0];
+      const endDate = new Date(endTime).toISOString().split('T')[0];
+      
+      // 獲取該孩子的所有里程碑記錄
+      const allRecords = await this.getByIndex('milestones', 'childId', childId);
+      
+      // 過濾出在日期範圍內的記錄
+      const filteredRecords = allRecords.filter(record => {
+        const recordDate = record.date;
+        return recordDate >= startDate && recordDate <= endDate;
+      });
+      
+      return filteredRecords;
+    } catch (error) {
+      console.error(`[BabyLogDB] 獲取里程碑日期範圍時出錯:`, error);
+      throw new Error(`獲取里程碑記錄失敗: ${error.message}`);
+    }
+  }
+
+  /**
+   * 獲取互動日誌的特殊方法（使用日期範圍）
+   * @param {number} childId - 孩子 ID
+   * @param {number} startTime - 開始時間戳
+   * @param {number} endTime - 結束時間戳
+   * @returns {Promise<Array>} 返回符合條件的互動日誌記錄數組
+   */
+  async getInteractionLogsByDateRange(childId, startTime, endTime) {
+    try {
+      // 轉換時間戳為日期字符串
+      const startDate = new Date(startTime).toISOString().split('T')[0];
+      const endDate = new Date(endTime).toISOString().split('T')[0];
+      
+      // 獲取該孩子的所有互動日誌記錄
+      const allRecords = await this.getByIndex('interactionLog', 'childId', childId);
+      
+      // 過濾出在日期範圍內的記錄
+      const filteredRecords = allRecords.filter(record => {
+        const recordDate = record.date;
+        return recordDate >= startDate && recordDate <= endDate;
+      });
+      
+      return filteredRecords;
+    } catch (error) {
+      console.error(`[BabyLogDB] 獲取互動日誌日期範圍時出錯:`, error);
+      throw new Error(`獲取互動日誌記錄失敗: ${error.message}`);
     }
   }
 
@@ -446,7 +553,9 @@ class BabyLogDB {
    * @returns {Promise<Array>} 返回符合條件的記錄數組
    */
   async getChildRecords(storeName, childId) {
-    return this.getByIndex(storeName, 'childId', childId);
+    // 確保 childId 是數字類型
+    const numericChildId = parseInt(childId);
+    return this.getByIndex(storeName, 'childId', numericChildId);
   }
 
   /**
@@ -493,6 +602,13 @@ class BabyLogDB {
         exportData[storeName] = await this.getAll(storeName);
       }
       
+      // 添加導出信息
+      exportData._metadata = {
+        exportDate: new Date().toISOString(),
+        appVersion: '1.0.0',
+        dbVersion: this.dbVersion
+      };
+      
       return exportData;
     } catch (error) {
       console.error('[BabyLogDB] 導出數據庫時出錯:', error);
@@ -513,6 +629,12 @@ class BabyLogDB {
       // 確認導入數據的格式是否正確
       if (!importData || typeof importData !== 'object') {
         throw new Error('導入數據格式不正確');
+      }
+      
+      // 檢查是否有元數據，如果有則記錄
+      if (importData._metadata) {
+        console.log('[BabyLogDB] 導入數據元資訊:', importData._metadata);
+        delete importData._metadata; // 移除元數據，不導入到數據庫
       }
       
       // 開始導入過程
@@ -553,6 +675,36 @@ class BabyLogDB {
     } catch (error) {
       console.error('[BabyLogDB] 導入數據庫時出錯:', error);
       throw new Error(`導入數據庫失敗: ${error.message}`);
+    }
+  }
+
+  /**
+   * 獲取數據庫狀態信息
+   * @returns {Promise<Object>} 數據庫狀態信息
+   */
+  async getDatabaseStatus() {
+    try {
+      await this._ensureDbConnection();
+      
+      const status = {
+        dbName: this.dbName,
+        dbVersion: this.dbVersion,
+        stores: {}
+      };
+      
+      // 統計每個 Object Store 的記錄數量
+      for (const storeName of Object.keys(this.objectStores)) {
+        const records = await this.getAll(storeName);
+        status.stores[storeName] = {
+          count: records.length,
+          lastUpdated: records.length > 0 ? Math.max(...records.map(r => r.timestamp || r.updatedAt || 0)) : null
+        };
+      }
+      
+      return status;
+    } catch (error) {
+      console.error('[BabyLogDB] 獲取數據庫狀態時出錯:', error);
+      throw new Error(`獲取數據庫狀態失敗: ${error.message}`);
     }
   }
 }
