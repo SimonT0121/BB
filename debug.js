@@ -1,6 +1,7 @@
 /**
  * 嬰幼兒照護追蹤系統 - 調試工具
  * 用於診斷健康數據載入失敗問題
+ * 只在設定頁面顯示
  */
 
 const BabyTrackerDebug = (function() {
@@ -829,10 +830,9 @@ const BabyTrackerDebug = (function() {
     };
 })();
 
-// 初始化調試工具
+// 這裡是新的代碼：只在設定頁面顯示調試按鈕
 document.addEventListener('DOMContentLoaded', function() {
-    // 創建調試按鈕但不立即添加到頁面
-    const debugButton = document.createElement('button');
+    let debugButton = document.createElement('button');
     debugButton.id = 'launch-debug';
     debugButton.innerText = '啟動調試工具';
     debugButton.style.cssText = `
@@ -848,53 +848,41 @@ document.addEventListener('DOMContentLoaded', function() {
         z-index: 9998;
         font-size: 14px;
         cursor: pointer;
+        display: none; /* 默認隱藏 */
     `;
+    
+    document.body.appendChild(debugButton);
     
     // 添加點擊事件
     debugButton.addEventListener('click', function() {
         BabyTrackerDebug.init();
     });
-    // 額外的檢查方法：定期檢查當前頁面
-setInterval(function() {
-    const settingsPage = document.getElementById('settings-page');
-    const debugButton = document.getElementById('launch-debug');
     
-    if (settingsPage && settingsPage.classList.contains('active')) {
-        // 設定頁面可見，應顯示調試按鈕
-        if (!debugButton || !debugButton.parentNode) {
-            document.body.appendChild(debugButton);
-        }
-    } else {
-        // 不在設定頁面，應移除調試按鈕
-        if (debugButton && debugButton.parentNode) {
-            debugButton.parentNode.removeChild(debugButton);
+    // 檢查當前是否在設定頁面
+    function checkSettingsPage() {
+        const settingsPage = document.getElementById('settings-page');
+        if (settingsPage && settingsPage.classList.contains('active')) {
+            // 如果在設定頁面，顯示調試按鈕
+            debugButton.style.display = 'block';
+        } else {
+            // 如果不在設定頁面，隱藏調試按鈕
+            debugButton.style.display = 'none';
         }
     }
-}, 1000); // 每秒檢查一次
-    // 監聽頁面切換
-    // 尋找設定頁面的導航元素
-    const settingsNavLink = document.querySelector('.nav-links a[data-page="settings"]');
-    if (settingsNavLink) {
-        settingsNavLink.addEventListener('click', function() {
-            // 當導航到設定頁面時顯示調試按鈕
-            if (!document.getElementById('launch-debug') && 
-                document.getElementById('settings-page').classList.contains('active')) {
-                document.body.appendChild(debugButton);
-            }
-        });
-    }
     
-    // 監聽其他頁面的導航，以便在離開設定頁面時移除按鈕
-    document.querySelectorAll('.nav-links a:not([data-page="settings"])').forEach(link => {
+    // 初始檢查
+    checkSettingsPage();
+    
+    // 給所有導航按鈕添加點擊事件，以檢測頁面變化
+    document.querySelectorAll('.nav-links a').forEach(link => {
         link.addEventListener('click', function() {
-            // 當離開設定頁面時移除調試按鈕
-            const button = document.getElementById('launch-debug');
-            if (button && button.parentNode) {
-                button.parentNode.removeChild(button);
-            }
+            // 延遲檢查，確保頁面已經切換
+            setTimeout(checkSettingsPage, 100);
         });
     });
-});
+    
+    // 使用定時器定期檢查，以防萬一
+    setInterval(checkSettingsPage, 1000); // 每秒檢查一次
     
     // 添加全局錯誤捕獲
     window.addEventListener('error', function(event) {
