@@ -1,7 +1,7 @@
 /**
  * 嬰幼兒照護追蹤系統 - 調試工具
  * 用於診斷健康數據載入失敗問題
- * 只在設定頁面顯示
+ * 只在設定頁面顯示小型按鈕
  */
 
 const BabyTrackerDebug = (function() {
@@ -830,11 +830,11 @@ const BabyTrackerDebug = (function() {
     };
 })();
 
-// 這裡是新的代碼：只在設定頁面顯示調試按鈕
+// 這裡是新的代碼：只在設定頁面顯示小型調試按鈕
 document.addEventListener('DOMContentLoaded', function() {
     let debugButton = document.createElement('button');
     debugButton.id = 'launch-debug';
-    debugButton.innerText = '啟動調試工具';
+    debugButton.innerHTML = '<i class="fas fa-tools"></i>'; // 使用工具圖標代替文字
     debugButton.style.cssText = `
         position: fixed;
         bottom: 20px;
@@ -842,13 +842,16 @@ document.addEventListener('DOMContentLoaded', function() {
         background: #2196f3;
         color: white;
         border: none;
-        padding: 10px 15px;
-        border-radius: 5px;
+        width: 40px;            /* 小型方形按鈕 */
+        height: 40px;           /* 小型方形按鈕 */
+        border-radius: 50%;     /* 圓形按鈕 */
         box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         z-index: 9998;
-        font-size: 14px;
+        font-size: 18px;        /* 更大的圖標 */
         cursor: pointer;
-        display: none; /* 默認隱藏 */
+        display: none;          /* 默認隱藏 */
+        align-items: center;    /* 垂直居中 */
+        justify-content: center; /* 水平居中 */
     `;
     
     document.body.appendChild(debugButton);
@@ -863,7 +866,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const settingsPage = document.getElementById('settings-page');
         if (settingsPage && settingsPage.classList.contains('active')) {
             // 如果在設定頁面，顯示調試按鈕
-            debugButton.style.display = 'block';
+            debugButton.style.display = 'flex';
         } else {
             // 如果不在設定頁面，隱藏調試按鈕
             debugButton.style.display = 'none';
