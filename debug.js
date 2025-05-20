@@ -854,7 +854,23 @@ document.addEventListener('DOMContentLoaded', function() {
     debugButton.addEventListener('click', function() {
         BabyTrackerDebug.init();
     });
+    // 額外的檢查方法：定期檢查當前頁面
+setInterval(function() {
+    const settingsPage = document.getElementById('settings-page');
+    const debugButton = document.getElementById('launch-debug');
     
+    if (settingsPage && settingsPage.classList.contains('active')) {
+        // 設定頁面可見，應顯示調試按鈕
+        if (!debugButton || !debugButton.parentNode) {
+            document.body.appendChild(debugButton);
+        }
+    } else {
+        // 不在設定頁面，應移除調試按鈕
+        if (debugButton && debugButton.parentNode) {
+            debugButton.parentNode.removeChild(debugButton);
+        }
+    }
+}, 1000); // 每秒檢查一次
     // 監聽頁面切換
     // 尋找設定頁面的導航元素
     const settingsNavLink = document.querySelector('.nav-links a[data-page="settings"]');
