@@ -831,7 +831,7 @@ const BabyTrackerDebug = (function() {
 
 // 初始化調試工具
 document.addEventListener('DOMContentLoaded', function() {
-    // 添加啟動調試工具的按鈕
+    // 創建調試按鈕但不立即添加到頁面
     const debugButton = document.createElement('button');
     debugButton.id = 'launch-debug';
     debugButton.innerText = '啟動調試工具';
@@ -850,12 +850,35 @@ document.addEventListener('DOMContentLoaded', function() {
         cursor: pointer;
     `;
     
-    document.body.appendChild(debugButton);
-    
     // 添加點擊事件
     debugButton.addEventListener('click', function() {
         BabyTrackerDebug.init();
     });
+    
+    // 監聽頁面切換
+    // 尋找設定頁面的導航元素
+    const settingsNavLink = document.querySelector('.nav-links a[data-page="settings"]');
+    if (settingsNavLink) {
+        settingsNavLink.addEventListener('click', function() {
+            // 當導航到設定頁面時顯示調試按鈕
+            if (!document.getElementById('launch-debug') && 
+                document.getElementById('settings-page').classList.contains('active')) {
+                document.body.appendChild(debugButton);
+            }
+        });
+    }
+    
+    // 監聽其他頁面的導航，以便在離開設定頁面時移除按鈕
+    document.querySelectorAll('.nav-links a:not([data-page="settings"])').forEach(link => {
+        link.addEventListener('click', function() {
+            // 當離開設定頁面時移除調試按鈕
+            const button = document.getElementById('launch-debug');
+            if (button && button.parentNode) {
+                button.parentNode.removeChild(button);
+            }
+        });
+    });
+});
     
     // 添加全局錯誤捕獲
     window.addEventListener('error', function(event) {
